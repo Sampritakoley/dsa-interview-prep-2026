@@ -68,6 +68,13 @@ h1 span{color:var(--accent)}
 .stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:2px}
 .stat-sep{width:1px;background:var(--border2);align-self:stretch}
 
+.progress-wrap{margin-bottom:1rem}
+.progress-label{font-size:13px;color:var(--text2);margin-bottom:6px}
+.progress-bar-bg{background:var(--bg3);border-radius:20px;height:8px;overflow:hidden}
+.progress-bar-fill{height:8px;border-radius:20px;background:var(--green);transition:width .4s ease}
+.done-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border2);background:none;color:var(--text3);cursor:pointer;font-family:var(--font-mono);transition:all .2s;white-space:nowrap}
+.done-btn.completed{background:var(--easy-bg);color:var(--easy-fg);border-color:var(--easy-fg)}
+  
 /* Filters */
 .filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filter-bar select,.filter-bar input{background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius);padding:6px 12px;font-size:13px;font-family:var(--font-body);outline:none;cursor:pointer;transition:border-color .15s}
@@ -183,6 +190,10 @@ tr.q-row.hidden{display:none}
 </header>
 
 <main>
+  <div class="progress-wrap">
+  <div class="progress-label">Progress: <span id="doneCount">0</span> / <span id="totalCount">130</span> completed</div>
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+</div>
   <div id="sections"></div>
   <div class="no-results" id="noResults">No questions match the current filters.</div>
 </main>
@@ -385,21 +396,23 @@ function build(){
       <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th style="width:35%">Question</th>
-          <th>Difficulty</th>
-          <th>LeetCode</th>
-          <th>Companies</th>
-          <th>Frequency</th>
-        </tr></thead>
-        <tbody>
-          ${sec.items.map((it,j)=>`<tr class="q-row" id="r${si}_${j}" data-d="${it.d}" data-f="${it.fr}" data-co="${it.co.join('|')}" data-q="${it.q.toLowerCase()}">
-            <td><span class="q-idx">${j+1}</span><span class="q-name">${it.q}</span></td>
-            <td><span class="badge ${diffClass(it.d)}">${it.d}</span></td>
-            <td>${lcEl(it.lc)}</td>
-            <td>${coEl(it.co)}</td>
-            <td><span class="badge ${freqClass(it.fr)}">${it.fr}</span></td>
-          </tr>`).join('')}
-        </tbody>
+  <th style="width:35%">Question</th>
+  <th>Difficulty</th>
+  <th>LeetCode</th>
+  <th>Companies</th>
+  <th>Frequency</th>
+  <th>Status</th>
+</tr></thead>
+       <tbody>
+  ${sec.items.map((it,j)=>`<tr class="q-row" id="r${si}_${j}" data-d="${it.d}" data-f="${it.fr}" data-co="${it.co.join('|')}" data-q="${it.q.toLowerCase()}">
+    <td><span class="q-idx">${j+1}</span><span class="q-name">${it.q}</span></td>
+    <td><span class="badge ${diffClass(it.d)}">${it.d}</span></td>
+    <td>${lcEl(it.lc)}</td>
+    <td>${coEl(it.co)}</td>
+    <td><span class="badge ${freqClass(it.fr)}">${it.fr}</span></td>
+    <td><button class="done-btn" id="btn_${si}_${j}" onclick="toggleDone('${si}_${j}', this)">Mark done</button></td>
+  </tr>`).join('')}
+</tbody>
       </table>
       </div>
     </div>`;
@@ -450,7 +463,30 @@ function applyFilters(){
   document.getElementById('visCount').textContent=vis;
   document.getElementById('noResults').classList.toggle('show',vis===0);
 }
+function toggleDone(id, btn) {
+  const done = JSON.parse(localStorage.getItem('done') || '{}');
+  if (done[id]) { delete done[id]; } else { done[id] = true; }
+  localStorage.setItem('done', JSON.stringify(done));
+  btn.classList.toggle('completed', !!done[id]);
+  btn.textContent = done[id] ? '✓ Done' : 'Mark done';
+  updateProgress();
+}
 
+function updateProgress() {
+  const done = JSON.parse(localStorage.getItem('done') || '{}');
+  const count = Object.keys(done).length;
+  document.getElementById('doneCount').textContent = count;
+  document.getElementById('progressBar').style.width = (count / 130 * 100).toFixed(1) + '%';
+}
+
+function loadDoneState() {
+  const done = JSON.parse(localStorage.getItem('done') || '{}');
+  Object.keys(done).forEach(id => {
+    const btn = document.getElementById('btn_' + id);
+    if (btn) { btn.classList.add('completed'); btn.textContent = '✓ Done'; }
+  });
+  updateProgress();
+}
 function clearFilters(){
   document.getElementById('fDiff').value='';
   document.getElementById('fFreq').value='';
@@ -458,7 +494,7 @@ function clearFilters(){
   document.getElementById('fSearch').value='';
   applyFilters();
 }
-
+loadDoneState();
 build();
 </script>
 </body>
