@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph DSA Interview Tracker — FAANG &amp; Big Tech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF2F6;
+    --grid-line: rgba(16,42,67,0.07);
+    --ink:#102A43;
+    --ink-soft:#51697F;
+    --card:#FFFFFF;
+    --card-border:#D9E3EA;
+    --accent:#157A9E;
+    --accent-dark:#0E5C78;
+    --accent-soft:#DCEEF4;
+    --good:#2F8F6F;
+    --good-bg:#F1FAF6;
+    --good-border:#BFE3D2;
+    --easy:#3F9142;
+    --medium:#C9821D;
+    --hard:#C8473A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:900px;margin:0 auto;padding:24px 18px 70px;}
+
+  header.hero{
+    position:relative;
+    border:1.5px solid var(--card-border);
+    border-radius:18px;
+    background:var(--card);
+    padding:26px 24px 22px;
+    margin-bottom:20px;
+    box-shadow:0 1px 0 rgba(16,42,67,0.03);
+  }
+  .hero-top{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;}
+  .hero-text{min-width:240px;flex:1;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--accent-dark);margin:0 0 10px;font-weight:600;
+  }
+  h1{font-family:'Space Grotesk',sans-serif;font-size:28px;margin:0 0 8px;line-height:1.18;}
+  .sub{color:var(--ink-soft);max-width:480px;margin:0;font-size:14.5px;line-height:1.55;}
+  .hero-graph{flex-shrink:0;width:150px;height:110px;}
+  .hero-graph line{stroke:var(--accent);stroke-opacity:.55;stroke-width:1.6;
+    stroke-dasharray:6;animation:dash 1.6s linear forwards;}
+  .hero-graph circle{fill:var(--card);stroke:var(--accent-dark);stroke-width:2;}
+  @keyframes dash{from{stroke-dashoffset:60;}to{stroke-dashoffset:0;}}
+  @media (prefers-reduced-motion:reduce){.hero-graph line{animation:none;}}
+
+  .progress-panel{margin-top:20px;border-top:1px dashed var(--card-border);padding-top:16px;}
+  .stat-line{display:flex;align-items:baseline;gap:7px;font-family:'IBM Plex Mono',monospace;}
+  #doneCount{font-size:25px;font-weight:600;color:var(--accent-dark);}
+  .stat-line span.of{color:var(--ink-soft);font-size:14px;}
+  .progress-track{height:9px;background:var(--accent-soft);border-radius:6px;margin-top:10px;overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-dark));transition:width .4s ease;}
+  .stat-row{display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--ink-soft);}
+  .link-btn{background:none;border:none;color:var(--accent-dark);text-decoration:underline;cursor:pointer;font-size:12.5px;padding:0;font-family:'Inter';}
+
+  nav.cat-nav{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px;}
+  .cat-pill{font-family:'IBM Plex Mono',monospace;font-size:11.5px;border:1px solid var(--card-border);
+    background:var(--card);padding:6px 11px;border-radius:999px;cursor:pointer;color:var(--ink-soft);text-decoration:none;}
+  .cat-pill:hover{border-color:var(--accent);color:var(--accent-dark);}
+
+  .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;font-size:12px;color:var(--ink-soft);}
+  .legend .chip{cursor:default;}
+
+  .controls{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+  .controls input[type=search]{
+    flex:1 1 170px;padding:10px 12px;border-radius:9px;border:1px solid var(--card-border);
+    font-family:'Inter';font-size:14px;background:var(--card);color:var(--ink);
+  }
+  .controls select{
+    padding:9px 8px;border-radius:9px;border:1px solid var(--card-border);
+    font-family:'Inter';font-size:13.5px;background:var(--card);color:var(--ink);
+  }
+  .toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+  .toggle input{accent-color:var(--accent);}
+  input:focus-visible, select:focus-visible, button:focus-visible, .check-circle:focus-visible{
+    outline:2px solid var(--accent);outline-offset:2px;
+  }
+
+  section.category{margin-bottom:28px;scroll-margin-top:16px;}
+  .cat-header{display:flex;align-items:baseline;gap:9px;margin-bottom:10px;}
+  .cat-index{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent-dark);font-weight:600;}
+  .cat-header h2{font-family:'Space Grotesk',sans-serif;font-size:17.5px;margin:0;}
+  .cat-count{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+
+  .problem-card{
+    display:flex;gap:13px;background:var(--card);border:1px solid var(--card-border);
+    border-radius:12px;padding:13px 15px;margin-bottom:9px;transition:border-color .15s, background .15s;
+  }
+  .problem-card.done{background:var(--good-bg);border-color:var(--good-border);}
+  .check-wrap{position:relative;flex-shrink:0;margin-top:1px;}
+  .check-wrap input{position:absolute;opacity:0;width:26px;height:26px;cursor:pointer;margin:0;top:0;left:0;}
+  .check-circle{
+    width:24px;height:24px;border-radius:50%;border:2px solid var(--card-border);
+    display:flex;align-items:center;justify-content:center;transition:all .15s;pointer-events:none;
+  }
+  .problem-card.done .check-circle{background:var(--good);border-color:var(--good);}
+  .check-circle svg{width:13px;height:13px;opacity:0;transition:opacity .15s;}
+  .problem-card.done .check-circle svg{opacity:1;}
+
+  .problem-main{flex:1;min-width:0;}
+  .problem-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .lc-num{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);}
+  .problem-title-row a{font-weight:600;color:var(--ink);text-decoration:none;font-size:15px;}
+  .problem-title-row a:hover{text-decoration:underline;color:var(--accent-dark);}
+  .problem-card.done .problem-title-row a{color:var(--ink-soft);text-decoration:line-through;}
+  .badge{font-family:'IBM Plex Mono',monospace;font-size:10.5px;padding:2px 7px;border-radius:5px;font-weight:600;}
+  .badge.E{background:#E4F3E6;color:var(--easy);}
+  .badge.M{background:#FBEFDC;color:var(--medium);}
+  .badge.H{background:#FAE5E2;color:var(--hard);}
+  .lock{font-size:10.5px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;}
+
+  .company-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:10.8px;padding:3px 8px;border-radius:6px;border:1px solid var(--card-border);color:var(--ink-soft);white-space:nowrap;}
+  .chip.VH{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
+  .chip.H{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .chip.M{background:var(--accent-soft);border-color:#BBDCE8;color:var(--accent-dark);}
+  .chip.L{background:#fff;color:var(--ink-soft);}
+
+  .empty-state{font-size:13.5px;color:var(--ink-soft);padding:14px 4px;}
+
+  footer{margin-top:26px;font-size:12px;color:var(--ink-soft);line-height:1.65;border-top:1px dashed var(--card-border);padding-top:16px;}
+  footer strong{color:var(--ink);}
+
+  @media (max-width:560px){
+    .hero-graph{display:none;}
+    h1{font-size:23px;}
+    .controls select{flex:1 1 45%;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <div class="hero-top">
+      <div class="hero-text">
+        <p class="eyebrow">FAANG &amp; Big Tech Interview Prep</p>
+        <h1>Graph DSA Tracker</h1>
+        <p class="sub">60 graph problems compiled from company-tagged interview trackers, organized as a guided path from fundamentals to advanced. Filter by company, check problems off, and watch the gaps close.</p>
+      </div>
+      <svg class="hero-graph" viewBox="0 0 200 140" aria-hidden="true">
+        <line x1="20" y1="100" x2="60" y2="40"></line>
+        <line x1="60" y1="40" x2="100" y2="90"></line>
+        <line x1="100" y1="90" x2="140" y2="30"></line>
+        <line x1="140" y1="30" x2="170" y2="100"></line>
+        <line x1="100" y1="90" x2="170" y2="100"></line>
+        <line x1="20" y1="100" x2="50" y2="130"></line>
+        <line x1="50" y1="130" x2="110" y2="130"></line>
+        <line x1="110" y1="130" x2="100" y2="90"></line>
+        <circle cx="20" cy="100" r="6"></circle>
+        <circle cx="60" cy="40" r="6"></circle>
+        <circle cx="100" cy="90" r="6"></circle>
+        <circle cx="140" cy="30" r="6"></circle>
+        <circle cx="170" cy="100" r="6"></circle>
+        <circle cx="50" cy="130" r="6"></circle>
+        <circle cx="110" cy="130" r="6"></circle>
+      </svg>
+    </div>
+
+    <div class="progress-panel">
+      <div class="stat-line"><span id="doneCount">0</span><span class="of">/ <span id="totalCount">60</span> solved</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="stat-row">
+        <span id="pctText">0% complete</span>
+        <button class="link-btn" id="resetBtn">Reset progress</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="cat-nav" id="catNav"></nav>
+
+  <div class="legend">
+    <span>Frequency:</span>
+    <span class="chip VH">Very High</span>
+    <span class="chip H">High</span>
+    <span class="chip M">Medium</span>
+    <span class="chip L">Low</span>
+  </div>
+
+  <div class="controls">
+    <input type="search" id="searchInput" placeholder="Search problem or company…">
+    <select id="companyFilter"><option value="">All companies</option></select>
+    <select id="categoryFilter"><option value="">All categories</option></select>
+    <select id="difficultyFilter">
+      <option value="">All difficulties</option>
+      <option value="E">Easy</option>
+      <option value="M">Medium</option>
+      <option value="H">Hard</option>
+    </select>
+    <label class="toggle"><input type="checkbox" id="hideDone"> Hide solved</label>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>
+    <strong>About this data:</strong> frequency tiers are approximate, aggregated from community-maintained LeetCode company-tag trackers — crowd-sourced from candidate-reported interviews, since LeetCode's own company tags are Premium-only and not officially published. Treat tiers as directional signal, not exact statistics. Problems marked "🔒 Premium" require LeetCode Premium to view on their site. Progress is saved automatically in this browser/session.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const CATS = [
+    {code:'basics', label:'Graph Fundamentals & Representation'},
+    {code:'grid',   label:'Grid & Matrix as Graph'},
+    {code:'topo',   label:'Topological Sort'},
+    {code:'uf',     label:'Union-Find (Disjoint Set)'},
+    {code:'sp',     label:'Shortest Path & Weighted Graphs'},
+    {code:'mst',    label:'Minimum Spanning Tree'},
+    {code:'special',label:'Bipartite, Properties & Implicit Graphs'}
+  ];
+  const FREQ_LABEL = {VH:'Very High', H:'High', M:'Medium', L:'Low'};
+  const DIFF_LABEL = {E:'Easy', M:'Medium', H:'Hard'};
+
+  const PROBLEMS = [
+    // Graph Fundamentals & Representation
+    {n:1971,t:'Find if Path Exists in Graph',s:'find-if-path-exists-in-graph',d:'E',p:false,c:'basics',co:[['Amazon','H'],['Google','M']]},
+    {n:133,t:'Clone Graph',s:'clone-graph',d:'M',p:false,c:'basics',co:[['Meta','H'],['Amazon','H'],['Google','M'],['Microsoft','M'],['Netflix','L']]},
+    {n:997,t:'Find the Town Judge',s:'find-the-town-judge',d:'E',p:false,c:'basics',co:[['Amazon','M'],['Microsoft','L']]},
+    {n:1791,t:'Find Center of Star Graph',s:'find-center-of-star-graph',d:'E',p:false,c:'basics',co:[['Microsoft','H'],['Amazon','L']]},
+    {n:277,t:'Find the Celebrity',s:'find-the-celebrity',d:'M',p:true,c:'basics',co:[['Amazon','M'],['Google','L']]},
+    {n:797,t:'All Paths From Source to Target',s:'all-paths-from-source-to-target',d:'M',p:false,c:'basics',co:[['Google','M'],['Amazon','L']]},
+    {n:1376,t:'Time Needed to Inform All Employees',s:'time-needed-to-inform-all-employees',d:'M',p:false,c:'basics',co:[['Amazon','M'],['Google','L']]},
+    {n:1615,t:'Maximal Network Rank',s:'maximal-network-rank',d:'M',p:false,c:'basics',co:[['Uber','M'],['Google','L']]},
+
+    // Grid & Matrix as Graph
+    {n:200,t:'Number of Islands',s:'number-of-islands',d:'M',p:false,c:'grid',co:[['Amazon','VH'],['Google','H'],['Meta','H'],['Microsoft','M'],['ByteDance','M']]},
+    {n:695,t:'Max Area of Island',s:'max-area-of-island',d:'M',p:false,c:'grid',co:[['Amazon','M'],['Google','M']]},
+    {n:1254,t:'Number of Closed Islands',s:'number-of-closed-islands',d:'M',p:false,c:'grid',co:[['Amazon','L'],['Google','L']]},
+    {n:694,t:'Number of Distinct Islands',s:'number-of-distinct-islands',d:'M',p:true,c:'grid',co:[['Google','M'],['Amazon','L']]},
+    {n:733,t:'Flood Fill',s:'flood-fill',d:'E',p:false,c:'grid',co:[['Amazon','M'],['Microsoft','M']]},
+    {n:130,t:'Surrounded Regions',s:'surrounded-regions',d:'M',p:false,c:'grid',co:[['Amazon','M'],['Oracle','M'],['Microsoft','M']]},
+    {n:286,t:'Walls and Gates',s:'walls-and-gates',d:'M',p:true,c:'grid',co:[['Google','M'],['Meta','M']]},
+    {n:994,t:'Rotting Oranges',s:'rotting-oranges',d:'M',p:false,c:'grid',co:[['Amazon','H'],['Google','M'],['Bloomberg','M']]},
+    {n:542,t:'01 Matrix',s:'01-matrix',d:'M',p:false,c:'grid',co:[['Google','M'],['Amazon','M']]},
+    {n:1091,t:'Shortest Path in Binary Matrix',s:'shortest-path-in-binary-matrix',d:'M',p:false,c:'grid',co:[['Amazon','M'],['Google','M']]},
+    {n:1162,t:'As Far from Land as Possible',s:'as-far-from-land-as-possible',d:'M',p:false,c:'grid',co:[['Amazon','M'],['Google','L']]},
+    {n:934,t:'Shortest Bridge',s:'shortest-bridge',d:'M',p:false,c:'grid',co:[['Amazon','M'],['Google','L']]},
+    {n:79,t:'Word Search',s:'word-search',d:'M',p:false,c:'grid',co:[['Amazon','H'],['Microsoft','H'],['Bloomberg','M']]},
+    {n:212,t:'Word Search II',s:'word-search-ii',d:'H',p:false,c:'grid',co:[['Amazon','M'],['Google','M']]},
+
+    // Topological Sort
+    {n:207,t:'Course Schedule',s:'course-schedule',d:'M',p:false,c:'topo',co:[['Google','H'],['Amazon','H'],['Bloomberg','M'],['Apple','M'],['Netflix','L']]},
+    {n:210,t:'Course Schedule II',s:'course-schedule-ii',d:'M',p:false,c:'topo',co:[['Amazon','H'],['Google','M'],['Microsoft','M']]},
+    {n:1462,t:'Course Schedule IV',s:'course-schedule-iv',d:'M',p:false,c:'topo',co:[['Google','L'],['Amazon','L']]},
+    {n:269,t:'Alien Dictionary',s:'alien-dictionary',d:'H',p:true,c:'topo',co:[['Google','H'],['Meta','H'],['Amazon','M']]},
+    {n:332,t:'Reconstruct Itinerary',s:'reconstruct-itinerary',d:'H',p:false,c:'topo',co:[['Google','M'],['Amazon','M']]},
+    {n:2050,t:'Parallel Courses III',s:'parallel-courses-iii',d:'H',p:false,c:'topo',co:[['Citadel','H'],['Google','M']]},
+    {n:2493,t:'Divide Nodes Into the Maximum Number of Groups',s:'divide-nodes-into-the-maximum-number-of-groups',d:'H',p:false,c:'topo',co:[['Google','M'],['Bloomberg','L']]},
+
+    // Union-Find
+    {n:684,t:'Redundant Connection',s:'redundant-connection',d:'M',p:false,c:'uf',co:[['Google','H'],['Amazon','M'],['Meta','M']]},
+    {n:685,t:'Redundant Connection II',s:'redundant-connection-ii',d:'H',p:false,c:'uf',co:[['Google','M']]},
+    {n:721,t:'Accounts Merge',s:'accounts-merge',d:'M',p:false,c:'uf',co:[['Meta','H'],['Amazon','H'],['Microsoft','M']]},
+    {n:1319,t:'Number of Operations to Make Network Connected',s:'number-of-operations-to-make-network-connected',d:'M',p:false,c:'uf',co:[['Amazon','M'],['Google','M'],['Microsoft','L']]},
+    {n:947,t:'Most Stones Removed with Same Row or Column',s:'most-stones-removed-with-same-row-or-column',d:'M',p:false,c:'uf',co:[['Google','M'],['Amazon','L']]},
+    {n:990,t:'Satisfiability of Equality Equations',s:'satisfiability-of-equality-equations',d:'M',p:false,c:'uf',co:[['Google','M'],['Amazon','L']]},
+    {n:959,t:'Regions Cut By Slashes',s:'regions-cut-by-slashes',d:'M',p:false,c:'uf',co:[['Google','L'],['Amazon','L']]},
+    {n:1202,t:'Smallest String With Swaps',s:'smallest-string-with-swaps',d:'M',p:false,c:'uf',co:[['Amazon','M'],['Google','L']]},
+    {n:2316,t:'Count Unreachable Pairs of Nodes in an Undirected Graph',s:'count-unreachable-pairs-of-nodes-in-an-undirected-graph',d:'M',p:false,c:'uf',co:[['Amazon','M'],['Google','L']]},
+    {n:765,t:'Couples Holding Hands',s:'couples-holding-hands',d:'H',p:false,c:'uf',co:[['Citadel','H'],['Google','M']]},
+    {n:261,t:'Graph Valid Tree',s:'graph-valid-tree',d:'M',p:true,c:'uf',co:[['Google','M'],['Meta','M'],['Amazon','L']]},
+    {n:323,t:'Number of Connected Components in an Undirected Graph',s:'number-of-connected-components-in-an-undirected-graph',d:'M',p:true,c:'uf',co:[['Google','M'],['Meta','M']]},
+
+    // Shortest Path & Weighted Graphs
+    {n:743,t:'Network Delay Time',s:'network-delay-time',d:'M',p:false,c:'sp',co:[['Google','H'],['Uber','H'],['Bloomberg','M']]},
+    {n:787,t:'Cheapest Flights Within K Stops',s:'cheapest-flights-within-k-stops',d:'M',p:false,c:'sp',co:[['Amazon','H'],['Google','M'],['Bloomberg','M']]},
+    {n:1514,t:'Path with Maximum Probability',s:'path-with-maximum-probability',d:'M',p:false,c:'sp',co:[['Google','M'],['Uber','L']]},
+    {n:778,t:'Swim in Rising Water',s:'swim-in-rising-water',d:'H',p:false,c:'sp',co:[['Google','M'],['Bloomberg','L']]},
+    {n:1631,t:'Path With Minimum Effort',s:'path-with-minimum-effort',d:'M',p:false,c:'sp',co:[['Google','M'],['Amazon','L']]},
+    {n:1334,t:'Find the City With the Smallest Number of Neighbors at a Threshold Distance',s:'find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance',d:'M',p:false,c:'sp',co:[['Google','M'],['Amazon','L']]},
+    {n:815,t:'Bus Routes',s:'bus-routes',d:'H',p:false,c:'sp',co:[['Google','M'],['Uber','M']]},
+    {n:802,t:'Find Eventual Safe States',s:'find-eventual-safe-states',d:'M',p:false,c:'sp',co:[['Google','M'],['Amazon','L']]},
+
+    // Minimum Spanning Tree
+    {n:1584,t:'Min Cost to Connect All Points',s:'min-cost-to-connect-all-points',d:'M',p:false,c:'mst',co:[['Google','M'],['Amazon','M']]},
+    {n:1135,t:'Connecting Cities With Minimum Cost',s:'connecting-cities-with-minimum-cost',d:'M',p:true,c:'mst',co:[['Google','M'],['Amazon','L']]},
+    {n:1168,t:'Optimize Water Distribution in a Village',s:'optimize-water-distribution-in-a-village',d:'H',p:true,c:'mst',co:[['Google','L']]},
+    {n:1489,t:'Find Critical and Pseudo-Critical Edges in Minimum Spanning Tree',s:'find-critical-and-pseudo-critical-edges-in-minimum-spanning-tree',d:'H',p:false,c:'mst',co:[['Google','L'],['Bloomberg','L']]},
+    {n:1192,t:'Critical Connections in a Network',s:'critical-connections-in-a-network',d:'H',p:false,c:'mst',co:[['Google','M'],['Oracle','M'],['Microsoft','L']]},
+
+    // Bipartite, Properties & Implicit Graphs
+    {n:785,t:'Is Graph Bipartite?',s:'is-graph-bipartite',d:'M',p:false,c:'special',co:[['Amazon','M'],['Google','M'],['Meta','L']]},
+    {n:886,t:'Possible Bipartition',s:'possible-bipartition',d:'M',p:false,c:'special',co:[['Google','M'],['Amazon','L']]},
+    {n:127,t:'Word Ladder',s:'word-ladder',d:'H',p:false,c:'special',co:[['Amazon','H'],['LinkedIn','H'],['Google','M'],['ByteDance','M']]},
+    {n:126,t:'Word Ladder II',s:'word-ladder-ii',d:'H',p:false,c:'special',co:[['Amazon','M'],['Google','M']]},
+    {n:752,t:'Open the Lock',s:'open-the-lock',d:'M',p:false,c:'special',co:[['Google','M'],['Apple','L']]},
+    {n:773,t:'Sliding Puzzle',s:'sliding-puzzle',d:'H',p:false,c:'special',co:[['Google','L'],['Apple','L']]}
+  ];
+
+  const TOTAL = PROBLEMS.length;
+  document.getElementById('totalCount').textContent = TOTAL;
+
+  // ---- storage ----
+  const STORAGE_KEY = 'graphdsa-tracker-progress-v1';
+  let doneIds = new Set();
+  let hasStorage = !!(window.storage && typeof window.storage.get === 'function');
+
+  async function loadProgress(){
+    if(!hasStorage) return;
+    try{
+      const res = await window.storage.get(STORAGE_KEY, false);
+      if(res && res.value){
+        const parsed = JSON.parse(res.value);
+        if(Array.isArray(parsed.ids)) doneIds = new Set(parsed.ids);
+      }
+    }catch(e){ /* no saved progress yet */ }
+  }
+  async function saveProgress(){
+    if(!hasStorage) return;
+    try{ await window.storage.set(STORAGE_KEY, JSON.stringify({ids:[...doneIds]}), false); }
+    catch(e){ console.error('Could not save progress', e); }
+  }
+
+  // ---- build filter option lists ----
+  const companySet = new Set();
+  PROBLEMS.forEach(p => p.co.forEach(([name]) => companySet.add(name)));
+  const companies = [...companySet].sort();
+  const companySelect = document.getElementById('companyFilter');
+  companies.forEach(name=>{
+    const o = document.createElement('option'); o.value=name; o.textContent=name;
+    companySelect.appendChild(o);
+  });
+  const categorySelect = document.getElementById('categoryFilter');
+  CATS.forEach(cat=>{
+    const o = document.createElement('option'); o.value=cat.code; o.textContent=cat.label;
+    categorySelect.appendChild(o);
+  });
+
+  // ---- category nav ----
+  const catNav = document.getElementById('catNav');
+  CATS.forEach(cat=>{
+    const a = document.createElement('a');
+    a.href = '#cat-'+cat.code; a.className='cat-pill'; a.textContent=cat.label;
+    catNav.appendChild(a);
+  });
+
+  function escapeHtml(str){
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function matchesFilters(p){
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const companyF = document.getElementById('companyFilter').value;
+    const categoryF = document.getElementById('categoryFilter').value;
+    const diffF = document.getElementById('difficultyFilter').value;
+    const hideDone = document.getElementById('hideDone').checked;
+
+    if(hideDone && doneIds.has(p.n)) return false;
+    if(categoryF && p.c !== categoryF) return false;
+    if(diffF && p.d !== diffF) return false;
+    if(companyF && !p.co.some(([name])=>name===companyF)) return false;
+    if(q){
+      const inTitle = p.t.toLowerCase().includes(q);
+      const inCompany = p.co.some(([name])=>name.toLowerCase().includes(q));
+      if(!inTitle && !inCompany) return false;
+    }
+    return true;
+  }
+
+  function renderCard(p){
+    const isDone = doneIds.has(p.n);
+    const companyChips = p.co.map(([name,freq])=>
+      `<span class="chip ${freq}">${escapeHtml(name)} · ${FREQ_LABEL[freq]}</span>`
+    ).join('');
+    const lockTag = p.p ? `<span class="lock">🔒 Premium</span>` : '';
+    return `
+      <div class="problem-card ${isDone?'done':''}" data-n="${p.n}">
+        <div class="check-wrap">
+          <input type="checkbox" id="chk-${p.n}" data-n="${p.n}" ${isDone?'checked':''} aria-label="Mark ${escapeHtml(p.t)} as done">
+          <label class="check-circle" for="chk-${p.n}">
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5L6.2 12L13 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </label>
+        </div>
+        <div class="problem-main">
+          <div class="problem-title-row">
+            <span class="lc-num">#${p.n}</span>
+            <a href="https://leetcode.com/problems/${p.s}/" target="_blank" rel="noopener">${escapeHtml(p.t)}</a>
+            <span class="badge ${p.d}">${DIFF_LABEL[p.d]}</span>
+            ${lockTag}
+          </div>
+          <div class="company-row">${companyChips}</div>
+        </div>
+      </div>`;
+  }
+
+  function render(){
+    const list = document.getElementById('list');
+    list.innerHTML = '';
+    CATS.forEach(cat=>{
+      const items = PROBLEMS.filter(p=>p.c===cat.code).filter(matchesFilters);
+      if(items.length===0) return;
+      const total = PROBLEMS.filter(p=>p.c===cat.code).length;
+      const idx = String(CATS.indexOf(cat)+1).padStart(2,'0');
+      const section = document.createElement('section');
+      section.className='category'; section.id='cat-'+cat.code;
+      section.innerHTML = `
+        <div class="cat-header">
+          <span class="cat-index">${idx}/07</span>
+          <h2>${cat.label}</h2>
+          <span class="cat-count">${items.length}/${total}</span>
+        </div>
+        ${items.map(renderCard).join('')}`;
+      list.appendChild(section);
+    });
+    if(list.innerHTML.trim()===''){
+      list.innerHTML = `<p class="empty-state">No problems match these filters. Try clearing the search or filters above.</p>`;
+    }
+    updateProgress();
+  }
+
+  function updateProgress(){
+    document.getElementById('doneCount').textContent = doneIds.size;
+    const pct = TOTAL ? Math.round((doneIds.size/TOTAL)*100) : 0;
+    document.getElementById('progressFill').style.width = pct+'%';
+    document.getElementById('pctText').textContent = pct+'% complete';
+  }
+
+  document.getElementById('list').addEventListener('change', (e)=>{
+    const target = e.target;
+    if(target && target.matches('input[type=checkbox][data-n]')){
+      const n = Number(target.dataset.n);
+      if(target.checked) doneIds.add(n); else doneIds.delete(n);
+      const card = target.closest('.problem-card');
+      if(card) card.classList.toggle('done', target.checked);
+      updateProgress();
+      saveProgress();
+    }
+  });
+
+  ['searchInput','companyFilter','categoryFilter','difficultyFilter','hideDone'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', render);
+    document.getElementById(id).addEventListener('change', render);
+  });
+
+  const resetBtn = document.getElementById('resetBtn');
+  let resetArmed = false;
+  resetBtn.addEventListener('click', ()=>{
+    if(!resetArmed){
+      resetArmed = true;
+      resetBtn.textContent = 'Click again to confirm';
+      setTimeout(()=>{ resetArmed=false; resetBtn.textContent='Reset progress'; }, 3000);
+      return;
+    }
+    doneIds.clear();
+    saveProgress();
+    render();
+    resetArmed = false;
+    resetBtn.textContent = 'Reset progress';
+  });
+
+  loadProgress().then(render);
+})();
+</script>
+</body>
+</html>
