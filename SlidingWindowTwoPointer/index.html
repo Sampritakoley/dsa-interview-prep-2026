@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sliding Window & Two Pointer Master List — Interview Prep 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0b0e14;
+    --panel:#11151d;
+    --panel2:#161b25;
+    --border:#232938;
+    --text:#dbe2f0;
+    --muted:#7c8699;
+    --mono: 'JetBrains Mono','Fira Code',ui-monospace,Consolas,monospace;
+    --sans: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+
+    --sw1:#f6ad55; --sw2:#facc15; --sw3:#fb923c; --sw4:#f97316;
+    --tp1:#a78bfa; --tp2:#63b3ed; --tp3:#4fd1c5; --tp4:#818cf8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans);
+    padding:28px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.12em;
+    color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family:var(--mono); font-size:26px; font-weight:700; margin:0 0 10px;
+    color:#fff; letter-spacing:-0.01em;
+  }
+  .disclaimer{
+    background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--sw1);
+    border-radius:6px; padding:14px 16px; font-size:13.5px; color:var(--muted); line-height:1.55;
+    margin-bottom:22px;
+  }
+  .disclaimer b{color:var(--text);}
+
+  .dashboard{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; margin-bottom:20px;
+  }
+  .stat{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px;
+  }
+  .stat .num{font-family:var(--mono); font-size:22px; font-weight:700; color:#fff;}
+  .stat .lbl{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+  .overall-bar{
+    height:6px; background:var(--panel2); border-radius:3px; overflow:hidden; margin-top:14px; margin-bottom:24px; border:1px solid var(--border);
+  }
+  .overall-fill{height:100%; background:linear-gradient(90deg,var(--sw1),var(--tp1)); width:0%; transition:width .3s;}
+
+  .filter-bar{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;
+  }
+  .filter-chip{
+    font-family:var(--mono); font-size:11.5px; padding:6px 12px; border-radius:20px;
+    border:1px solid var(--border); background:var(--panel); color:var(--muted);
+    cursor:pointer; transition:all .15s;
+  }
+  .filter-chip:hover{color:var(--text); border-color:var(--muted);}
+  .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text); font-weight:700;}
+
+  .group-section{margin-bottom:34px;}
+  .group-header{
+    display:flex; align-items:center; gap:12px; margin-bottom:14px;
+    padding-bottom:10px; border-bottom:2px solid var(--border);
+  }
+  .group-header h2{
+    font-family:var(--mono); font-size:19px; font-weight:800; margin:0;
+    color:#fff; letter-spacing:.02em;
+  }
+  .group-badge{
+    font-family:var(--mono); font-size:11px; color:var(--muted);
+    background:var(--panel); border:1px solid var(--border); padding:3px 10px; border-radius:12px;
+  }
+  .group-icon{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+
+  .topic{
+    margin-bottom:16px; background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .topic-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:13px 18px; cursor:pointer; user-select:none;
+    border-bottom:1px solid var(--border);
+  }
+  .topic-head:hover{background:var(--panel2);}
+  .topic-title-group{display:flex; align-items:center; gap:10px;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .topic-title{font-family:var(--mono); font-weight:700; font-size:14px; color:#fff;}
+  .topic-count{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .topic-progress{width:70px; height:5px; border-radius:3px; background:var(--panel2); overflow:hidden; border:1px solid var(--border);}
+  .topic-progress-fill{height:100%;}
+  .chevron{color:var(--muted); font-size:12px; transition:transform .2s;}
+  .topic.collapsed .chevron{transform:rotate(-90deg);}
+  .topic.collapsed .qlist{display:none;}
+
+  .qlist{padding:4px 0;}
+  .qrow{
+    display:grid;
+    grid-template-columns:28px 1fr auto auto auto auto;
+    align-items:center; gap:12px;
+    padding:10px 18px; border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .qrow:last-child{border-bottom:none;}
+  .qrow.done{opacity:.45;}
+  .qrow.done .qname{text-decoration:line-through;}
+
+  .chk{
+    width:17px; height:17px; border-radius:4px; border:1.5px solid var(--muted);
+    cursor:pointer; background:transparent; position:relative; flex-shrink:0;
+  }
+  .chk.checked{background:var(--accent,var(--sw1)); border-color:var(--accent,var(--sw1));}
+  .chk.checked::after{
+    content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#0b0e14; font-weight:900;
+  }
+
+  .qname{color:var(--text); font-weight:500;}
+  .qname .lc{color:var(--muted); font-family:var(--mono); font-size:11.5px; margin-left:6px;}
+
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:3px 7px; border-radius:4px;
+    white-space:nowrap; text-align:center; border:1px solid transparent;
+  }
+  .diff-Easy{color:#68d391; border-color:#68d39144; background:#68d39114;}
+  .diff-Medium{color:#f6ad55; border-color:#f6ad5544; background:#f6ad5514;}
+  .diff-Hard{color:#fc8181; border-color:#fc818144; background:#fc818114;}
+
+  .freq{display:flex; align-items:center; gap:5px;}
+  .freq-dots{display:flex; align-items:center; gap:3px;}
+  .freq-label{font-family:var(--mono); font-size:10.5px; color:var(--muted); white-space:nowrap;}
+  .freq-dot{width:5px;height:5px;border-radius:50%;background:var(--border);}
+  .freq-dot.on{background:var(--accent,var(--sw1));}
+
+  .qrow.hidden-by-filter{display:none;}
+  .topic.hidden-by-filter{display:none;}
+
+  .companies{color:var(--muted); font-size:11.5px; max-width:230px; line-height:1.4;}
+
+  @media (max-width:760px){
+    .qrow{grid-template-columns:24px 1fr; row-gap:6px;}
+    .qrow > .badge, .qrow > .freq, .qrow > .companies{grid-column:2; margin-left:0;}
+    .companies{max-width:none;}
+  }
+
+  footer{margin-top:30px; text-align:center; color:var(--muted); font-size:12px; font-family:var(--mono);}
+  .reset-btn{
+    font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--panel);
+    border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; margin-top:10px;
+  }
+  .reset-btn:hover{color:var(--text); border-color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Samp // DSA Interview Prep 2026 — Module: Sliding Window & Two Pointer</div>
+    <h1>Sliding Window & Two Pointer Master List</h1>
+    <div class="disclaimer">
+      <b>Honesty note:</b> no public source — including me — has a verified log of "every sliding window / two pointer question ever asked at every company." Company tags reflect <b>patterns commonly reported</b> in interview-experience threads (LeetCode Discuss, GFG, Glassdoor), not confirmed per-question sourcing. What's reliable: the pattern coverage itself. Both techniques overlap heavily with the Array and String lists you already have — a few questions here (e.g. Longest Substring Without Repeating Characters, Trapping Rain Water) also appear there, since interviewers classify by pattern, not by data type. That overlap is intentional cross-training, not duplication for its own sake.
+    </div>
+    <div class="overall-bar"><div class="overall-fill" id="overallFill"></div></div>
+  </header>
+
+  <div class="dashboard" id="dashboard"></div>
+
+  <div class="filter-bar" id="filterBar"></div>
+
+  <div id="topics"></div>
+
+  <footer>
+    Progress saved locally on this device (localStorage) · not synced across devices
+    <br>
+    <button class="reset-btn" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('swtpMasterListProgress');render();}">Reset progress</button>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+// ============ SLIDING WINDOW ============
+{
+  key:'sw-fixed', group:'sw', title:'Fixed-Size Window', color:'var(--sw1)',
+  questions:[
+    {n:'Maximum Sum Subarray of Size K', d:'Easy', lc:'Custom (GFG)', f:3, c:'Service-based cos, Amazon, Zoho'},
+    {n:'First Negative Number in Every Window of Size K', d:'Medium', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+    {n:'Count Occurrences of Anagrams (fixed window)', d:'Medium', lc:438, f:2, c:'Amazon, Meta (Find All Anagrams variant)'},
+    {n:'Maximum of All Subarrays of Size K (deque)', d:'Hard', lc:239, f:3, c:'Amazon, Google, Microsoft — classic deque window'},
+    {n:'Average of All Contiguous Subarrays of Size K', d:'Easy', lc:643, f:1, c:'Amazon (rare)'},
+    {n:'Count Distinct Elements in Every Window of Size K', d:'Medium', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'sw-variable', group:'sw', title:'Variable-Size Window (Shrinking)', color:'var(--sw2)',
+  questions:[
+    {n:'Minimum Size Subarray Sum', d:'Medium', lc:209, f:3, c:'Amazon, Microsoft, Google'},
+    {n:'Longest Subarray with Sum K', d:'Medium', lc:'Custom (GFG)', f:2, c:'Flipkart, Paytm, service-based cos'},
+    {n:'Max Consecutive Ones III', d:'Medium', lc:1004, f:2, c:'Amazon, Meta'},
+    {n:'Longest Subarray of 1s After Deleting One Element', d:'Medium', lc:1493, f:1, c:'Amazon (rare)'},
+    {n:'Subarray Product Less Than K', d:'Medium', lc:713, f:2, c:'Amazon, Google'},
+    {n:'Fruit Into Baskets', d:'Medium', lc:904, f:1, c:'Google (rare)'},
+    {n:'Maximum Points You Can Obtain from Cards', d:'Medium', lc:1423, f:2, c:'Amazon, Uber'},
+    {n:'Grumpy Bookstore Owner', d:'Medium', lc:1052, f:1, c:'Google (rare)'},
+    {n:'Shortest Subarray with Sum at Least K', d:'Hard', lc:862, f:1, c:'Google (rare, monotonic deque)'},
+    {n:'Minimum Number of Flips to Make Binary String Alternating', d:'Medium', lc:1888, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'sw-string', group:'sw', title:'String / Character-Based Window', color:'var(--sw3)',
+  questions:[
+    {n:'Longest Substring Without Repeating Characters', d:'Medium', lc:3, f:4, c:'Amazon, Microsoft, Google, Meta, Adobe — near-universal'},
+    {n:'Longest Repeating Character Replacement', d:'Medium', lc:424, f:3, c:'Amazon, Meta, Google'},
+    {n:'Minimum Window Substring', d:'Hard', lc:76, f:4, c:'Amazon, Meta, Microsoft, Google — iconic hard sliding window'},
+    {n:'Find All Anagrams in a String', d:'Medium', lc:438, f:3, c:'Amazon, Meta, Microsoft'},
+    {n:'Permutation in String', d:'Medium', lc:567, f:3, c:'Amazon, Meta, Google'},
+    {n:'Longest Substring with At Most K Distinct Characters', d:'Medium', lc:340, f:2, c:'Amazon, Google'},
+    {n:'Longest Substring with At Most Two Distinct Characters', d:'Medium', lc:159, f:1, c:'Google (rare)'},
+    {n:'Count Number of Nice Subarrays (odd count window)', d:'Medium', lc:1248, f:1, c:'Google (rare)'},
+    {n:'Longest Nice Substring', d:'Easy', lc:1763, f:1, c:'Amazon (rare)'},
+    {n:'Smallest Substring Containing All Characters of Another String', d:'Hard', lc:'Custom (GFG, same as LC76)', f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'sw-advanced', group:'sw', title:'Advanced Sliding Window', color:'var(--sw4)',
+  questions:[
+    {n:'Sliding Window Median', d:'Hard', lc:480, f:1, c:'Google (rare, two-heap + window)'},
+    {n:'Sliding Window Maximum', d:'Hard', lc:239, f:3, c:'Amazon, Google, Microsoft'},
+    {n:'Frequency of the Most Frequent Element (window + sort)', d:'Medium', lc:1838, f:1, c:'Amazon (rare)'},
+    {n:'Subarrays with K Different Integers', d:'Hard', lc:992, f:1, c:'Google (rare, "at most K" trick)'},
+    {n:'Minimum Operations to Reduce X to Zero (reverse window)', d:'Medium', lc:1658, f:1, c:'Amazon (rare)'},
+    {n:'Length of Longest Subarray With at Most K Frequency', d:'Medium', lc:2958, f:1, c:'Amazon, Google (rare, newer LC)'},
+    {n:'Continuous Subarrays (window with max-min constraint)', d:'Medium', lc:2762, f:1, c:'Amazon (rare)'},
+  ]
+},
+// ============ TWO POINTERS ============
+{
+  key:'tp-opposite', group:'tp', title:'Opposite Direction (Converging)', color:'var(--tp1)',
+  questions:[
+    {n:'Two Sum II (sorted input)', d:'Medium', lc:167, f:2, c:'Amazon, Microsoft'},
+    {n:'Valid Palindrome', d:'Easy', lc:125, f:4, c:'Amazon, Meta, Microsoft, Adobe, Paytm — extremely common'},
+    {n:'Valid Palindrome II', d:'Easy', lc:680, f:3, c:'Amazon, Meta, Google'},
+    {n:'Container With Most Water', d:'Medium', lc:11, f:4, c:'Amazon, Meta, Microsoft, Adobe, Goldman Sachs'},
+    {n:'Trapping Rain Water (two-pointer approach)', d:'Hard', lc:42, f:4, c:'Amazon, Google, Meta, Microsoft — iconic array hard'},
+    {n:'3Sum', d:'Medium', lc:15, f:4, c:'Amazon, Meta, Microsoft, Google, Flipkart'},
+    {n:'3Sum Closest', d:'Medium', lc:16, f:2, c:'Amazon, Meta'},
+    {n:'4Sum', d:'Medium', lc:18, f:2, c:'Amazon, Google'},
+    {n:'Reverse String (in-place)', d:'Easy', lc:344, f:3, c:'Warm-up across nearly every company'},
+    {n:'Reverse Vowels of a String', d:'Easy', lc:345, f:1, c:'Amazon (rare)'},
+    {n:'Squares of a Sorted Array', d:'Easy', lc:977, f:2, c:'Amazon, Microsoft'},
+    {n:'Boats to Save People', d:'Medium', lc:881, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'tp-same', group:'tp', title:'Same Direction (Fast-Slow / Read-Write)', color:'var(--tp2)',
+  questions:[
+    {n:'Remove Duplicates from Sorted Array', d:'Easy', lc:26, f:3, c:'Amazon, Microsoft, Adobe'},
+    {n:'Remove Duplicates from Sorted Array II', d:'Medium', lc:80, f:1, c:'Amazon (rare)'},
+    {n:'Remove Element', d:'Easy', lc:27, f:2, c:'Amazon, Microsoft'},
+    {n:'Move Zeroes', d:'Easy', lc:283, f:3, c:'Amazon, Microsoft, Meta, Paytm'},
+    {n:'Sort Colors (Dutch National Flag)', d:'Medium', lc:75, f:4, c:'Amazon, Microsoft, Google, Adobe, Uber'},
+    {n:'Merge Sorted Array (two-pointer from end)', d:'Easy', lc:88, f:3, c:'Amazon, Microsoft, Meta, Adobe'},
+    {n:'Is Subsequence', d:'Easy', lc:392, f:2, c:'Amazon, Google, Adobe'},
+    {n:'Backspace String Compare', d:'Easy', lc:844, f:2, c:'Amazon, Microsoft, Google'},
+    {n:'Merge Strings Alternately', d:'Easy', lc:1768, f:1, c:'Amazon (rare)'},
+    {n:'Partition Array According to Given Pivot', d:'Medium', lc:2161, f:1, c:'Amazon (rare)'},
+    {n:'Sort Array By Parity', d:'Easy', lc:905, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'tp-cycle', group:'tp', title:'Fast-Slow (Cycle Detection)', color:'var(--tp3)',
+  questions:[
+    {n:'Linked List Cycle', d:'Easy', lc:141, f:3, c:'Amazon, Microsoft, Google, Adobe — Floyd\'s classic'},
+    {n:'Linked List Cycle II (find start of cycle)', d:'Medium', lc:142, f:3, c:'Amazon, Microsoft, Google'},
+    {n:'Middle of the Linked List', d:'Easy', lc:876, f:3, c:'Amazon, Microsoft, Adobe'},
+    {n:'Happy Number', d:'Easy', lc:202, f:2, c:'Amazon, Google'},
+    {n:'Find the Duplicate Number (cycle detection variant)', d:'Medium', lc:287, f:3, c:'Amazon, Google, Microsoft'},
+    {n:'Palindrome Linked List (fast-slow + reverse)', d:'Easy', lc:234, f:3, c:'Amazon, Microsoft, Meta'},
+    {n:'Reorder List (fast-slow + merge)', d:'Medium', lc:143, f:2, c:'Amazon, Meta'},
+  ]
+},
+{
+  key:'tp-merge', group:'tp', title:'Merging / Multi-Array', color:'var(--tp4)',
+  questions:[
+    {n:'Merge Two Sorted Arrays (no extra space)', d:'Medium', lc:'Custom (GFG)', f:2, c:'Service-based cos, Amazon'},
+    {n:'Merge Two Sorted Lists', d:'Easy', lc:21, f:4, c:'Amazon, Microsoft, Google, Meta, Adobe — extremely common'},
+    {n:'Intersection of Two Arrays II', d:'Easy', lc:350, f:2, c:'Amazon, Microsoft'},
+    {n:'Interval List Intersections', d:'Medium', lc:986, f:2, c:'Amazon, Meta'},
+    {n:'Sort Merge Two Sorted Arrays (K-way variant)', d:'Hard', lc:'Custom', f:1, c:'Amazon (rare)'},
+    {n:'Median of Two Sorted Arrays (two-pointer/binary search)', d:'Hard', lc:4, f:3, c:'Google, Amazon, Meta, Microsoft'},
+    {n:'Shortest Distance Between Two Words (pointer sweep)', d:'Easy', lc:243, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'tp-advanced', group:'tp', title:'Advanced Two Pointers', color:'var(--tp1)',
+  questions:[
+    {n:'Longest Mountain in Array', d:'Medium', lc:845, f:1, c:'Amazon (rare)'},
+    {n:'Container With Most Water — follow-up variants', d:'Hard', lc:'Custom', f:1, c:'Adobe (rare, follow-up depth)'},
+    {n:'3Sum Smaller', d:'Medium', lc:259, f:1, c:'Google (rare, subscription-gated LC)'},
+    {n:'Number of Subsequences That Satisfy Sum Condition', d:'Medium', lc:1498, f:1, c:'Amazon (rare)'},
+    {n:'Minimum Number of Days to Make M Bouquets (binary search + pointer)', d:'Medium', lc:1482, f:1, c:'Amazon (rare)'},
+    {n:'Two Pointer on Matrix (Search a 2D Matrix II)', d:'Medium', lc:240, f:2, c:'Amazon, Google, Adobe'},
+    {n:'Rotate Array (three-reversal two-pointer trick)', d:'Medium', lc:189, f:4, c:'Amazon, Microsoft, Google, Adobe, Flipkart'},
+  ]
+},
+];
+
+const GROUP_META = {
+  sw: {label:'Sliding Window', icon:'linear-gradient(135deg,var(--sw1),var(--sw4))'},
+  tp: {label:'Two Pointer', icon:'linear-gradient(135deg,var(--tp1),var(--tp4))'}
+};
+
+const FREQ_LABEL = {1:'Rare',2:'Occasional',3:'Frequent',4:'Very Frequent'};
+const STORAGE_KEY = 'swtpMasterListProgress';
+const COLLAPSE_KEY = 'swtpMasterListCollapse';
+let activeFilter = null; // null = show all, else 1-4
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveProgress(p){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+function loadCollapse(){
+  try{ return JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveCollapse(c){
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify(c));
+}
+
+function qid(topicKey, idx){ return topicKey+'-'+idx; }
+
+function render(){
+  const progress = loadProgress();
+  const collapse = loadCollapse();
+
+  let totalQ=0, totalDone=0;
+  const dashEl = document.getElementById('dashboard');
+  const topicsEl = document.getElementById('topics');
+  topicsEl.innerHTML='';
+
+  // group topics by 'sw' then 'tp', preserving original order within each
+  ['sw','tp'].forEach(groupKey=>{
+    const groupTopics = DATA.filter(t=>t.group===groupKey);
+    if(groupTopics.length===0) return;
+
+    let groupDone=0, groupTotal=0;
+    groupTopics.forEach(t=>{
+      groupTotal += t.questions.length;
+      groupDone += t.questions.filter((q,i)=>progress[qid(t.key,i)]).length;
+    });
+
+    const groupSection = document.createElement('div');
+    groupSection.className = 'group-section';
+    groupSection.innerHTML = `
+      <div class="group-header">
+        <span class="group-icon" style="background:${GROUP_META[groupKey].icon}"></span>
+        <h2>${GROUP_META[groupKey].label}</h2>
+        <span class="group-badge">${groupDone}/${groupTotal} done</span>
+      </div>
+      <div class="group-topics"></div>
+    `;
+    const groupTopicsEl = groupSection.querySelector('.group-topics');
+
+    groupTopics.forEach(topic=>{
+      const done = topic.questions.filter((q,i)=>progress[qid(topic.key,i)]).length;
+      totalQ += topic.questions.length;
+      totalDone += done;
+
+      const isCollapsed = !!collapse[topic.key];
+      const topicDiv = document.createElement('div');
+      topicDiv.className = 'topic' + (isCollapsed ? ' collapsed':'');
+
+      const pct = Math.round((done/topic.questions.length)*100);
+
+      topicDiv.innerHTML = `
+        <div class="topic-head" data-key="${topic.key}">
+          <div class="topic-title-group">
+            <span class="dot" style="background:${topic.color}"></span>
+            <span class="topic-title">${topic.title}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="topic-count">${done}/${topic.questions.length}</span>
+            <div class="topic-progress"><div class="topic-progress-fill" style="width:${pct}%;background:${topic.color}"></div></div>
+            <span class="chevron">▼</span>
+          </div>
+        </div>
+        <div class="qlist"></div>
+      `;
+
+      const qlist = topicDiv.querySelector('.qlist');
+      let visibleCount = 0;
+      topic.questions.forEach((q,i)=>{
+        const id = qid(topic.key,i);
+        const isDone = !!progress[id];
+        const row = document.createElement('div');
+        row.className = 'qrow' + (isDone?' done':'');
+        row.style.setProperty('--accent', topic.color);
+
+        let dots='';
+        for(let d=1; d<=4; d++){
+          dots += `<span class="freq-dot ${d<=q.f?'on':''}" style="${d<=q.f?`background:${topic.color}`:''}"></span>`;
+        }
+
+        row.dataset.freq = q.f;
+        if(activeFilter && Number(activeFilter) !== q.f){
+          row.classList.add('hidden-by-filter');
+        } else {
+          visibleCount++;
+        }
+
+        row.innerHTML = `
+          <button class="chk ${isDone?'checked':''}" data-id="${id}" style="--accent:${topic.color}"></button>
+          <span class="qname">${q.n}<span class="lc">${q.lc==='Custom'?'· Custom':'· LC '+q.lc}</span></span>
+          <span class="badge diff-${q.d}">${q.d}</span>
+          <span class="freq" title="${FREQ_LABEL[q.f]}">
+            <span class="freq-dots">${dots}</span>
+            <span class="freq-label">${FREQ_LABEL[q.f]}</span>
+          </span>
+          <span class="companies">${q.c}</span>
+        `;
+        qlist.appendChild(row);
+      });
+
+      if(activeFilter && visibleCount===0){
+        topicDiv.classList.add('hidden-by-filter');
+      }
+
+      groupTopicsEl.appendChild(topicDiv);
+    });
+
+    topicsEl.appendChild(groupSection);
+  });
+
+  // dashboard
+  dashEl.innerHTML = `
+    <div class="stat"><div class="num">${totalQ}</div><div class="lbl">Total Questions</div></div>
+    <div class="stat"><div class="num">${totalDone}</div><div class="lbl">Completed</div></div>
+    <div class="stat"><div class="num">${totalQ-totalDone}</div><div class="lbl">Remaining</div></div>
+    <div class="stat"><div class="num">${totalQ?Math.round((totalDone/totalQ)*100):0}%</div><div class="lbl">Progress</div></div>
+  `;
+  document.getElementById('overallFill').style.width = (totalQ?Math.round((totalDone/totalQ)*100):0)+'%';
+
+  // filter bar
+  const filterBar = document.getElementById('filterBar');
+  const chips = [{f:null,l:'All'},{f:4,l:'Very Frequent'},{f:3,l:'Frequent'},{f:2,l:'Occasional'},{f:1,l:'Rare'}];
+  filterBar.innerHTML = chips.map(ch=>
+    `<button class="filter-chip ${activeFilter===ch.f?'active':''}" data-f="${ch.f}">${ch.l}</button>`
+  ).join('');
+  filterBar.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const val = chip.dataset.f;
+      activeFilter = (val==='null') ? null : Number(val);
+      render();
+    });
+  });
+
+  // wire events
+  document.querySelectorAll('.chk').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const p = loadProgress();
+      const id = btn.dataset.id;
+      p[id] = !p[id];
+      saveProgress(p);
+      render();
+    });
+  });
+  document.querySelectorAll('.topic-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const c = loadCollapse();
+      const key = head.dataset.key;
+      c[key] = !c[key];
+      saveCollapse(c);
+      render();
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
