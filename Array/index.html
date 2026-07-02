@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Array Master List — Interview Prep 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0b0e14;
+    --panel:#11151d;
+    --panel2:#161b25;
+    --border:#232938;
+    --text:#dbe2f0;
+    --muted:#7c8699;
+    --mono: 'JetBrains Mono','Fira Code',ui-monospace,Consolas,monospace;
+    --sans: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+
+    --c-basics:#4fd1c5;
+    --c-two:#a78bfa;
+    --c-window:#f6ad55;
+    --c-sort:#f687b3;
+    --c-prefix:#68d391;
+    --c-binsearch:#63b3ed;
+    --c-matrix:#fc8181;
+    --c-interval:#38bdf8;
+    --c-kadane:#facc15;
+    --c-adv:#ff8b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans);
+    padding:28px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.12em;
+    color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family:var(--mono); font-size:28px; font-weight:700; margin:0 0 10px;
+    color:#fff; letter-spacing:-0.01em;
+  }
+  .disclaimer{
+    background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--c-window);
+    border-radius:6px; padding:14px 16px; font-size:13.5px; color:var(--muted); line-height:1.55;
+    margin-bottom:22px;
+  }
+  .disclaimer b{color:var(--text);}
+
+  .dashboard{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; margin-bottom:26px;
+  }
+  .stat{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px;
+  }
+  .stat .num{font-family:var(--mono); font-size:22px; font-weight:700; color:#fff;}
+  .stat .lbl{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+  .overall-bar{
+    height:6px; background:var(--panel2); border-radius:3px; overflow:hidden; margin-top:14px; border:1px solid var(--border);
+  }
+  .overall-fill{height:100%; background:linear-gradient(90deg,var(--c-basics),var(--c-matrix)); width:0%; transition:width .3s;}
+
+  .topic{
+    margin-bottom:22px; background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .topic-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 18px; cursor:pointer; user-select:none;
+    border-bottom:1px solid var(--border);
+  }
+  .topic-head:hover{background:var(--panel2);}
+  .topic-title-group{display:flex; align-items:center; gap:10px;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .topic-title{font-family:var(--mono); font-weight:700; font-size:15px; color:#fff;}
+  .topic-count{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .topic-progress{width:70px; height:5px; border-radius:3px; background:var(--panel2); overflow:hidden; border:1px solid var(--border);}
+  .topic-progress-fill{height:100%;}
+  .chevron{color:var(--muted); font-size:12px; transition:transform .2s;}
+  .topic.collapsed .chevron{transform:rotate(-90deg);}
+  .topic.collapsed .qlist{display:none;}
+
+  .qlist{padding:4px 0;}
+  .qrow{
+    display:grid;
+    grid-template-columns:28px 1fr auto auto auto auto;
+    align-items:center; gap:12px;
+    padding:10px 18px; border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .qrow:last-child{border-bottom:none;}
+  .qrow.done{opacity:.45;}
+  .qrow.done .qname{text-decoration:line-through;}
+
+  .chk{
+    width:17px; height:17px; border-radius:4px; border:1.5px solid var(--muted);
+    cursor:pointer; background:transparent; position:relative; flex-shrink:0;
+  }
+  .chk.checked{background:var(--accent,var(--c-basics)); border-color:var(--accent,var(--c-basics));}
+  .chk.checked::after{
+    content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#0b0e14; font-weight:900;
+  }
+
+  .qname{color:var(--text); font-weight:500;}
+  .qname .lc{color:var(--muted); font-family:var(--mono); font-size:11.5px; margin-left:6px;}
+
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:3px 7px; border-radius:4px;
+    white-space:nowrap; text-align:center; border:1px solid transparent;
+  }
+  .diff-Easy{color:#68d391; border-color:#68d39144; background:#68d39114;}
+  .diff-Medium{color:#f6ad55; border-color:#f6ad5544; background:#f6ad5514;}
+  .diff-Hard{color:#fc8181; border-color:#fc818144; background:#fc818114;}
+
+  .freq{display:flex; align-items:center; gap:5px;}
+  .freq-dots{display:flex; align-items:center; gap:3px;}
+  .freq-label{font-family:var(--mono); font-size:10.5px; color:var(--muted); white-space:nowrap;}
+  .freq-dot{width:5px;height:5px;border-radius:50%;background:var(--border);}
+  .freq-dot.on{background:var(--accent,var(--c-basics));}
+
+  .filter-bar{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;
+  }
+  .filter-chip{
+    font-family:var(--mono); font-size:11.5px; padding:6px 12px; border-radius:20px;
+    border:1px solid var(--border); background:var(--panel); color:var(--muted);
+    cursor:pointer; transition:all .15s;
+  }
+  .filter-chip:hover{color:var(--text); border-color:var(--muted);}
+  .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text); font-weight:700;}
+  .qrow.hidden-by-filter{display:none;}
+
+  .companies{color:var(--muted); font-size:11.5px; max-width:230px; line-height:1.4;}
+
+  @media (max-width:760px){
+    .qrow{grid-template-columns:24px 1fr; row-gap:6px;}
+    .qrow > .badge, .qrow > .freq, .qrow > .companies{grid-column:2; margin-left:0;}
+    .companies{max-width:none;}
+  }
+
+  footer{margin-top:30px; text-align:center; color:var(--muted); font-size:12px; font-family:var(--mono);}
+  .reset-btn{
+    font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--panel);
+    border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; margin-top:10px;
+  }
+  .reset-btn:hover{color:var(--text); border-color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Samp // DSA Interview Prep 2026 — Module: Arrays</div>
+    <h1>Array Master List</h1>
+    <div class="disclaimer">
+      <b>Honesty note:</b> no public source — including me — has a verified log of "every array question ever asked at every company." Company tags below reflect <b>patterns commonly reported</b> in interview-experience threads (LeetCode Discuss, GFG, Glassdoor), not confirmed per-question sourcing. Treat them as "companies known to draw from this pattern," not a guarantee any one of them asked exactly this. What's reliable: the question set itself — this covers the array patterns (two pointers, sliding window, prefix sum, sorting, binary search, matrix, intervals, Kadane's) that show up across service-based, product-based, and FAANG-tier interviews.
+    </div>
+    <div class="overall-bar"><div class="overall-fill" id="overallFill"></div></div>
+  </header>
+
+  <div class="dashboard" id="dashboard"></div>
+
+  <div class="filter-bar" id="filterBar"></div>
+
+  <div id="topics"></div>
+
+  <footer>
+    Progress saved locally on this device (localStorage) · not synced across devices
+    <br>
+    <button class="reset-btn" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('arrayMasterListProgress');render();}">Reset progress</button>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+{
+  key:'basics', title:'Traversal & Basics', color:'var(--c-basics)',
+  questions:[
+    {n:'Find Maximum/Minimum in Array', d:'Easy', lc:'Custom', f:2, c:'Warm-up across almost every service-based company'},
+    {n:'Second Largest Element', d:'Easy', lc:'Custom (GFG)', f:2, c:'TCS, Infosys, Zoho, Directi'},
+    {n:'Reverse an Array (in-place)', d:'Easy', lc:'Custom', f:2, c:'Warm-up, Samsung, Zoho'},
+    {n:'Rotate Array', d:'Medium', lc:189, f:4, c:'Amazon, Microsoft, Google, Adobe, Flipkart'},
+    {n:'Move Zeroes', d:'Easy', lc:283, f:3, c:'Amazon, Microsoft, Meta, Paytm'},
+    {n:'Remove Duplicates from Sorted Array', d:'Easy', lc:26, f:3, c:'Amazon, Microsoft, Adobe'},
+    {n:'Remove Element', d:'Easy', lc:27, f:2, c:'Amazon, Microsoft'},
+    {n:'Plus One', d:'Easy', lc:66, f:2, c:'Google, Amazon'},
+    {n:'Pascal\'s Triangle', d:'Easy', lc:118, f:2, c:'Amazon, Microsoft, Adobe'},
+    {n:'Majority Element (Boyer-Moore)', d:'Easy', lc:169, f:3, c:'Amazon, Microsoft, Google, Flipkart'},
+    {n:'Majority Element II (n/3)', d:'Medium', lc:229, f:2, c:'Amazon, Google'},
+    {n:'Single Number (XOR)', d:'Easy', lc:136, f:3, c:'Amazon, Microsoft, Adobe, Samsung'},
+    {n:'Single Number II', d:'Medium', lc:137, f:1, c:'Google (rare)'},
+    {n:'Single Number III', d:'Medium', lc:260, f:1, c:'Google (rare)'},
+    {n:'Missing Number', d:'Easy', lc:268, f:3, c:'Amazon, Microsoft, Zoho, Paytm'},
+    {n:'Find the Duplicate Number', d:'Medium', lc:287, f:3, c:'Amazon, Google, Microsoft'},
+    {n:'Find All Duplicates in an Array', d:'Medium', lc:442, f:2, c:'Amazon, Adobe'},
+    {n:'Set Matrix Zeroes (array/matrix basics)', d:'Medium', lc:73, f:3, c:'Amazon, Microsoft, Meta'},
+    {n:'Sort Colors (Dutch National Flag)', d:'Medium', lc:75, f:4, c:'Amazon, Microsoft, Google, Adobe, Uber'},
+    {n:'Next Permutation', d:'Medium', lc:31, f:3, c:'Amazon, Meta, Microsoft, Goldman Sachs'},
+  ]
+},
+{
+  key:'two', title:'Two Pointers', color:'var(--c-two)',
+  questions:[
+    {n:'Two Sum', d:'Easy', lc:1, f:4, c:'Every company at some point — Amazon, Google, Meta, Adobe, Paytm, Swiggy'},
+    {n:'Two Sum II (sorted input)', d:'Medium', lc:167, f:2, c:'Amazon, Microsoft'},
+    {n:'3Sum', d:'Medium', lc:15, f:4, c:'Amazon, Meta, Microsoft, Google, Flipkart'},
+    {n:'3Sum Closest', d:'Medium', lc:16, f:2, c:'Amazon, Meta'},
+    {n:'4Sum', d:'Medium', lc:18, f:2, c:'Amazon, Google'},
+    {n:'Container With Most Water', d:'Medium', lc:11, f:4, c:'Amazon, Meta, Microsoft, Adobe, Goldman Sachs'},
+    {n:'Trapping Rain Water', d:'Hard', lc:42, f:4, c:'Amazon, Google, Meta, Microsoft — one of the most iconic array hards'},
+    {n:'Sort Array By Parity', d:'Easy', lc:905, f:1, c:'Amazon (rare)'},
+    {n:'Squares of a Sorted Array', d:'Easy', lc:977, f:2, c:'Amazon, Microsoft'},
+    {n:'Merge Sorted Array', d:'Easy', lc:88, f:3, c:'Amazon, Microsoft, Meta, Adobe'},
+    {n:'Boats to Save People', d:'Medium', lc:881, f:1, c:'Amazon (rare)'},
+    {n:'Valid Palindrome II (array/string variant)', d:'Easy', lc:680, f:1, c:'Meta (occasional)'},
+    {n:'Partition Array According to Given Pivot', d:'Medium', lc:2161, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'window', title:'Sliding Window', color:'var(--c-window)',
+  questions:[
+    {n:'Maximum Sum Subarray of Size K', d:'Easy', lc:'Custom (GFG)', f:3, c:'Service-based cos, Amazon, Zoho'},
+    {n:'Longest Subarray with Sum K', d:'Medium', lc:'Custom (GFG)', f:2, c:'Flipkart, Paytm, service-based cos'},
+    {n:'Minimum Size Subarray Sum', d:'Medium', lc:209, f:3, c:'Amazon, Microsoft, Google'},
+    {n:'Maximum Points You Can Obtain from Cards', d:'Medium', lc:1423, f:2, c:'Amazon, Uber'},
+    {n:'Sliding Window Maximum', d:'Hard', lc:239, f:3, c:'Amazon, Google, Microsoft — classic deque + array hard'},
+    {n:'Fruit Into Baskets', d:'Medium', lc:904, f:1, c:'Google (rare)'},
+    {n:'Max Consecutive Ones III', d:'Medium', lc:1004, f:2, c:'Amazon, Meta'},
+    {n:'Subarray Product Less Than K', d:'Medium', lc:713, f:2, c:'Amazon, Google'},
+    {n:'Longest Subarray of 1s After Deleting One Element', d:'Medium', lc:1493, f:1, c:'Amazon (rare)'},
+    {n:'Grumpy Bookstore Owner', d:'Medium', lc:1052, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'sort', title:'Sorting-Based', color:'var(--c-sort)',
+  questions:[
+    {n:'Merge Intervals (see also Intervals topic)', d:'Medium', lc:56, f:4, c:'Amazon, Google, Meta, Microsoft, Uber'},
+    {n:'Merge Two Sorted Arrays (no extra space)', d:'Medium', lc:'Custom (GFG)', f:2, c:'Service-based cos, Amazon'},
+    {n:'Kth Largest Element in an Array', d:'Medium', lc:215, f:4, c:'Amazon, Microsoft, Google, Adobe, Flipkart'},
+    {n:'Top K Frequent Elements', d:'Medium', lc:347, f:3, c:'Amazon, Meta, Microsoft, Google'},
+    {n:'Sort an Array (implement merge/quick sort)', d:'Medium', lc:912, f:2, c:'Goldman Sachs, Morgan Stanley, service-based cos'},
+    {n:'Relative Sort Array', d:'Easy', lc:1122, f:1, c:'Amazon (rare)'},
+    {n:'Wiggle Sort', d:'Medium', lc:280, f:1, c:'Google (rare)'},
+    {n:'Wiggle Sort II', d:'Medium', lc:324, f:1, c:'Google (rare)'},
+    {n:'H-Index', d:'Medium', lc:274, f:2, c:'Amazon, Google'},
+    {n:'Meeting Rooms (sorting variant)', d:'Easy', lc:252, f:2, c:'Meta, Amazon, Google'},
+    {n:'Meeting Rooms II', d:'Medium', lc:253, f:3, c:'Meta, Amazon, Google, Uber'},
+    {n:'Largest Number (custom comparator)', d:'Medium', lc:179, f:2, c:'Amazon, Google, Adobe'},
+  ]
+},
+{
+  key:'prefix', title:'Prefix Sum / Hashing', color:'var(--c-prefix)',
+  questions:[
+    {n:'Subarray Sum Equals K', d:'Medium', lc:560, f:4, c:'Amazon, Meta, Microsoft, Google, Flipkart'},
+    {n:'Continuous Subarray Sum', d:'Medium', lc:523, f:2, c:'Amazon, Meta'},
+    {n:'Product of Array Except Self', d:'Medium', lc:238, f:4, c:'Amazon, Meta, Microsoft, Google, Adobe — extremely common'},
+    {n:'Range Sum Query - Immutable', d:'Easy', lc:303, f:2, c:'Amazon, Google'},
+    {n:'Contiguous Array (equal 0s and 1s)', d:'Medium', lc:525, f:2, c:'Amazon, Meta'},
+    {n:'Find Pivot Index', d:'Easy', lc:724, f:2, c:'Amazon, Microsoft'},
+    {n:'Subarray Sums Divisible by K', d:'Medium', lc:974, f:1, c:'Amazon (rare)'},
+    {n:'Maximum Size Subarray Sum Equals K', d:'Medium', lc:325, f:1, c:'Meta (rare)'},
+    {n:'Count Number of Nice Subarrays', d:'Medium', lc:1248, f:1, c:'Google (rare)'},
+    {n:'First Missing Positive', d:'Hard', lc:41, f:3, c:'Amazon, Microsoft, Google, Adobe — classic in-place hash trick'},
+  ]
+},
+{
+  key:'binsearch', title:'Binary Search on Arrays', color:'var(--c-binsearch)',
+  questions:[
+    {n:'Binary Search (classic)', d:'Easy', lc:704, f:3, c:'Universal warm-up, all companies'},
+    {n:'Search in Rotated Sorted Array', d:'Medium', lc:33, f:4, c:'Amazon, Microsoft, Google, Meta, Adobe — very common'},
+    {n:'Search in Rotated Sorted Array II (dupes)', d:'Medium', lc:81, f:2, c:'Amazon, Google'},
+    {n:'Find Minimum in Rotated Sorted Array', d:'Medium', lc:153, f:3, c:'Amazon, Microsoft, Google'},
+    {n:'Find Peak Element', d:'Medium', lc:162, f:3, c:'Amazon, Microsoft, Google, Adobe'},
+    {n:'Median of Two Sorted Arrays', d:'Hard', lc:4, f:3, c:'Google, Amazon, Meta, Microsoft — iconic hard binary search'},
+    {n:'Koko Eating Bananas', d:'Medium', lc:875, f:2, c:'Amazon, Google — binary search on answer'},
+    {n:'Capacity To Ship Packages Within D Days', d:'Medium', lc:1011, f:2, c:'Amazon, Google'},
+    {n:'Split Array Largest Sum', d:'Hard', lc:410, f:1, c:'Google (rare)'},
+    {n:'Find K Closest Elements', d:'Medium', lc:658, f:1, c:'Amazon (rare)'},
+    {n:'Search a 2D Matrix', d:'Medium', lc:74, f:2, c:'Amazon, Microsoft'},
+    {n:'Search a 2D Matrix II', d:'Medium', lc:240, f:2, c:'Amazon, Google, Adobe'},
+    {n:'Allocate Minimum Number of Pages (GFG classic)', d:'Hard', lc:'Custom (GFG)', f:2, c:'Service-based cos, Amazon (binary search on answer)'},
+    {n:'Aggressive Cows (GFG classic)', d:'Hard', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'matrix', title:'Matrix / 2D Array', color:'var(--c-matrix)',
+  questions:[
+    {n:'Rotate Image (matrix 90°)', d:'Medium', lc:48, f:3, c:'Amazon, Microsoft, Meta, Adobe'},
+    {n:'Spiral Matrix', d:'Medium', lc:54, f:3, c:'Amazon, Microsoft, Google, Adobe'},
+    {n:'Spiral Matrix II', d:'Medium', lc:59, f:1, c:'Amazon (rare)'},
+    {n:'Transpose Matrix', d:'Easy', lc:867, f:1, c:'Warm-up, service-based cos'},
+    {n:'Diagonal Traverse', d:'Medium', lc:498, f:1, c:'Google (rare)'},
+    {n:'Word Search (matrix backtracking)', d:'Medium', lc:79, f:3, c:'Amazon, Microsoft, Meta'},
+    {n:'Number of Islands (matrix/graph hybrid)', d:'Medium', lc:200, f:4, c:'Amazon, Meta, Microsoft, Google — extremely common'},
+    {n:'Max Area of Island', d:'Medium', lc:695, f:2, c:'Amazon, Google'},
+    {n:'Game of Life', d:'Medium', lc:289, f:2, c:'Google, Meta, Amazon'},
+    {n:'Valid Sudoku', d:'Medium', lc:36, f:2, c:'Amazon, Microsoft, Uber'},
+    {n:'Toeplitz Matrix', d:'Easy', lc:766, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'interval', title:'Intervals', color:'var(--c-interval)',
+  questions:[
+    {n:'Insert Interval', d:'Medium', lc:57, f:3, c:'Amazon, Meta, Google, LinkedIn-adjacent product cos'},
+    {n:'Non-overlapping Intervals', d:'Medium', lc:435, f:3, c:'Amazon, Google, Meta'},
+    {n:'Minimum Number of Arrows to Burst Balloons', d:'Medium', lc:452, f:2, c:'Amazon, Google'},
+    {n:'Employee Free Time', d:'Hard', lc:759, f:1, c:'Google, Meta (rare, subscription-gated LC)'},
+    {n:'Interval List Intersections', d:'Medium', lc:986, f:2, c:'Amazon, Meta'},
+    {n:'My Calendar I', d:'Medium', lc:729, f:1, c:'Google (rare)'},
+    {n:'Car Pooling', d:'Medium', lc:1094, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'kadane', title:'Kadane\'s / Subarray Optimization', color:'var(--c-kadane)',
+  questions:[
+    {n:'Maximum Subarray (Kadane\'s Algorithm)', d:'Easy', lc:53, f:4, c:'Almost every company — Amazon, Microsoft, Google, Adobe, Paytm'},
+    {n:'Maximum Circular Subarray Sum', d:'Medium', lc:918, f:2, c:'Amazon, Google'},
+    {n:'Maximum Product Subarray', d:'Medium', lc:152, f:3, c:'Amazon, Microsoft, Goldman Sachs'},
+    {n:'Best Time to Buy and Sell Stock', d:'Easy', lc:121, f:4, c:'Nearly universal — Amazon, Microsoft, Adobe, Paytm, Swiggy'},
+    {n:'Maximum Average Subarray I', d:'Easy', lc:643, f:1, c:'Amazon (rare)'},
+    {n:'Shortest Unsorted Continuous Subarray', d:'Medium', lc:581, f:1, c:'Amazon (rare)'},
+    {n:'Maximum Sum of 3 Non-Overlapping Subarrays', d:'Hard', lc:689, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'adv', title:'Advanced / Miscellaneous', color:'var(--c-adv)',
+  questions:[
+    {n:'Trapping Rain Water II (3D variant)', d:'Hard', lc:407, f:1, c:'Google (rare)'},
+    {n:'Sliding Window Median', d:'Hard', lc:480, f:1, c:'Google (rare)'},
+    {n:'Count of Smaller Numbers After Self', d:'Hard', lc:315, f:1, c:'Google (rare)'},
+    {n:'Longest Consecutive Sequence', d:'Medium', lc:128, f:3, c:'Amazon, Meta, Microsoft, Google'},
+    {n:'Gas Station', d:'Medium', lc:134, f:2, c:'Amazon, Uber, Google'},
+    {n:'Candy', d:'Hard', lc:135, f:1, c:'Google (rare)'},
+    {n:'Summary Ranges', d:'Easy', lc:228, f:1, c:'Amazon (rare)'},
+    {n:'Merge Sorted Array with K Lists (array variant)', d:'Hard', lc:'Custom', f:1, c:'Amazon (rare)'},
+    {n:'Maximum Gap', d:'Hard', lc:164, f:1, c:'Google (rare)'},
+    {n:'Find Minimum in Rotated Sorted Array II', d:'Hard', lc:154, f:1, c:'Amazon (rare)'},
+    {n:'Wiggle Subsequence (array variant)', d:'Medium', lc:376, f:1, c:'Microsoft (rare)'},
+    {n:'Random Pick with Weight (prefix sum + binary search)', d:'Medium', lc:528, f:1, c:'Amazon, Google (rare)'},
+    {n:'K-diff Pairs in an Array', d:'Medium', lc:532, f:1, c:'Amazon (rare)'},
+    {n:'Minimum Number of Operations to Move All Balls', d:'Medium', lc:1769, f:1, c:'Amazon (rare)'},
+    {n:'Rearrange Array Elements by Sign', d:'Medium', lc:2149, f:1, c:'Amazon (rare)'},
+  ]
+},
+];
+
+const FREQ_LABEL = {1:'Rare',2:'Occasional',3:'Frequent',4:'Very Frequent'};
+const STORAGE_KEY = 'arrayMasterListProgress';
+const COLLAPSE_KEY = 'arrayMasterListCollapse';
+let activeFilter = null; // null = show all, else 1-4
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveProgress(p){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+function loadCollapse(){
+  try{ return JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveCollapse(c){
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify(c));
+}
+
+function qid(topicKey, idx){ return topicKey+'-'+idx; }
+
+function render(){
+  const progress = loadProgress();
+  const collapse = loadCollapse();
+
+  let totalQ=0, totalDone=0;
+  const dashEl = document.getElementById('dashboard');
+  const topicsEl = document.getElementById('topics');
+  topicsEl.innerHTML='';
+
+  DATA.forEach(topic=>{
+    const done = topic.questions.filter((q,i)=>progress[qid(topic.key,i)]).length;
+    totalQ += topic.questions.length;
+    totalDone += done;
+
+    const isCollapsed = !!collapse[topic.key];
+    const topicDiv = document.createElement('div');
+    topicDiv.className = 'topic' + (isCollapsed ? ' collapsed':'');
+
+    const pct = Math.round((done/topic.questions.length)*100);
+
+    topicDiv.innerHTML = `
+      <div class="topic-head" data-key="${topic.key}">
+        <div class="topic-title-group">
+          <span class="dot" style="background:${topic.color}"></span>
+          <span class="topic-title">${topic.title}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="topic-count">${done}/${topic.questions.length}</span>
+          <div class="topic-progress"><div class="topic-progress-fill" style="width:${pct}%;background:${topic.color}"></div></div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="qlist"></div>
+    `;
+
+    const qlist = topicDiv.querySelector('.qlist');
+    topic.questions.forEach((q,i)=>{
+      const id = qid(topic.key,i);
+      const isDone = !!progress[id];
+      const row = document.createElement('div');
+      row.className = 'qrow' + (isDone?' done':'');
+      row.style.setProperty('--accent', topic.color);
+
+      let dots='';
+      for(let d=1; d<=4; d++){
+        dots += `<span class="freq-dot ${d<=q.f?'on':''}" style="${d<=q.f?`background:${topic.color}`:''}"></span>`;
+      }
+
+      row.dataset.freq = q.f;
+      if(activeFilter && Number(activeFilter) !== q.f){
+        row.classList.add('hidden-by-filter');
+      }
+
+      row.innerHTML = `
+        <button class="chk ${isDone?'checked':''}" data-id="${id}" style="--accent:${topic.color}"></button>
+        <span class="qname">${q.n}<span class="lc">${q.lc==='Custom'?'· Custom':'· LC '+q.lc}</span></span>
+        <span class="badge diff-${q.d}">${q.d}</span>
+        <span class="freq" title="${FREQ_LABEL[q.f]}">
+          <span class="freq-dots">${dots}</span>
+          <span class="freq-label">${FREQ_LABEL[q.f]}</span>
+        </span>
+        <span class="companies">${q.c}</span>
+      `;
+      qlist.appendChild(row);
+    });
+
+    topicsEl.appendChild(topicDiv);
+  });
+
+  // dashboard
+  dashEl.innerHTML = `
+    <div class="stat"><div class="num">${totalQ}</div><div class="lbl">Total Questions</div></div>
+    <div class="stat"><div class="num">${totalDone}</div><div class="lbl">Completed</div></div>
+    <div class="stat"><div class="num">${totalQ-totalDone}</div><div class="lbl">Remaining</div></div>
+    <div class="stat"><div class="num">${totalQ?Math.round((totalDone/totalQ)*100):0}%</div><div class="lbl">Progress</div></div>
+  `;
+  document.getElementById('overallFill').style.width = (totalQ?Math.round((totalDone/totalQ)*100):0)+'%';
+
+  // filter bar
+  const filterBar = document.getElementById('filterBar');
+  const chips = [{f:null,l:'All'},{f:4,l:'Very Frequent'},{f:3,l:'Frequent'},{f:2,l:'Occasional'},{f:1,l:'Rare'}];
+  filterBar.innerHTML = chips.map(ch=>
+    `<button class="filter-chip ${activeFilter===ch.f?'active':''}" data-f="${ch.f}">${ch.l}</button>`
+  ).join('');
+  filterBar.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const val = chip.dataset.f;
+      activeFilter = (val==='null') ? null : Number(val);
+      render();
+    });
+  });
+
+  // wire events
+  document.querySelectorAll('.chk').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const p = loadProgress();
+      const id = btn.dataset.id;
+      p[id] = !p[id];
+      saveProgress(p);
+      render();
+    });
+  });
+  document.querySelectorAll('.topic-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const c = loadCollapse();
+      const key = head.dataset.key;
+      c[key] = !c[key];
+      saveCollapse(c);
+      render();
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
