@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>String Master List — Interview Prep 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0b0e14;
+    --panel:#11151d;
+    --panel2:#161b25;
+    --border:#232938;
+    --text:#dbe2f0;
+    --muted:#7c8699;
+    --mono: 'JetBrains Mono','Fira Code',ui-monospace,Consolas,monospace;
+    --sans: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+
+    --c-basics:#4fd1c5;
+    --c-two:#a78bfa;
+    --c-window:#f6ad55;
+    --c-anagram:#f687b3;
+    --c-pattern:#68d391;
+    --c-stack:#63b3ed;
+    --c-trie:#fc8181;
+    --c-adv:#ff8b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans);
+    padding:28px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.12em;
+    color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family:var(--mono); font-size:28px; font-weight:700; margin:0 0 10px;
+    color:#fff; letter-spacing:-0.01em;
+  }
+  .disclaimer{
+    background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--c-window);
+    border-radius:6px; padding:14px 16px; font-size:13.5px; color:var(--muted); line-height:1.55;
+    margin-bottom:22px;
+  }
+  .disclaimer b{color:var(--text);}
+
+  .dashboard{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; margin-bottom:26px;
+  }
+  .stat{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px;
+  }
+  .stat .num{font-family:var(--mono); font-size:22px; font-weight:700; color:#fff;}
+  .stat .lbl{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+  .overall-bar{
+    height:6px; background:var(--panel2); border-radius:3px; overflow:hidden; margin-top:14px; border:1px solid var(--border);
+  }
+  .overall-fill{height:100%; background:linear-gradient(90deg,var(--c-basics),var(--c-trie)); width:0%; transition:width .3s;}
+
+  .topic{
+    margin-bottom:22px; background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .topic-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 18px; cursor:pointer; user-select:none;
+    border-bottom:1px solid var(--border);
+  }
+  .topic-head:hover{background:var(--panel2);}
+  .topic-title-group{display:flex; align-items:center; gap:10px;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .topic-title{font-family:var(--mono); font-weight:700; font-size:15px; color:#fff;}
+  .topic-count{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .topic-progress{width:70px; height:5px; border-radius:3px; background:var(--panel2); overflow:hidden; border:1px solid var(--border);}
+  .topic-progress-fill{height:100%;}
+  .chevron{color:var(--muted); font-size:12px; transition:transform .2s;}
+  .topic.collapsed .chevron{transform:rotate(-90deg);}
+  .topic.collapsed .qlist{display:none;}
+
+  .qlist{padding:4px 0;}
+  .qrow{
+    display:grid;
+    grid-template-columns:28px 1fr auto auto auto auto;
+    align-items:center; gap:12px;
+    padding:10px 18px; border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .qrow:last-child{border-bottom:none;}
+  .qrow.done{opacity:.45;}
+  .qrow.done .qname{text-decoration:line-through;}
+
+  .chk{
+    width:17px; height:17px; border-radius:4px; border:1.5px solid var(--muted);
+    cursor:pointer; background:transparent; position:relative; flex-shrink:0;
+  }
+  .chk.checked{background:var(--accent,var(--c-basics)); border-color:var(--accent,var(--c-basics));}
+  .chk.checked::after{
+    content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#0b0e14; font-weight:900;
+  }
+
+  .qname{color:var(--text); font-weight:500;}
+  .qname .lc{color:var(--muted); font-family:var(--mono); font-size:11.5px; margin-left:6px;}
+
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:3px 7px; border-radius:4px;
+    white-space:nowrap; text-align:center; border:1px solid transparent;
+  }
+  .diff-Easy{color:#68d391; border-color:#68d39144; background:#68d39114;}
+  .diff-Medium{color:#f6ad55; border-color:#f6ad5544; background:#f6ad5514;}
+  .diff-Hard{color:#fc8181; border-color:#fc818144; background:#fc818114;}
+
+  .freq{display:flex; align-items:center; gap:5px;}
+  .freq-dots{display:flex; align-items:center; gap:3px;}
+  .freq-label{font-family:var(--mono); font-size:10.5px; color:var(--muted); white-space:nowrap;}
+  .freq-dot{width:5px;height:5px;border-radius:50%;background:var(--border);}
+  .freq-dot.on{background:var(--accent,var(--c-basics));}
+
+  .filter-bar{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;
+  }
+  .filter-chip{
+    font-family:var(--mono); font-size:11.5px; padding:6px 12px; border-radius:20px;
+    border:1px solid var(--border); background:var(--panel); color:var(--muted);
+    cursor:pointer; transition:all .15s;
+  }
+  .filter-chip:hover{color:var(--text); border-color:var(--muted);}
+  .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text); font-weight:700;}
+  .qrow.hidden-by-filter{display:none;}
+
+  .companies{color:var(--muted); font-size:11.5px; max-width:230px; line-height:1.4;}
+
+  @media (max-width:760px){
+    .qrow{grid-template-columns:24px 1fr; row-gap:6px;}
+    .qrow > .badge, .qrow > .freq, .qrow > .companies{grid-column:2; margin-left:0;}
+    .companies{max-width:none;}
+  }
+
+  footer{margin-top:30px; text-align:center; color:var(--muted); font-size:12px; font-family:var(--mono);}
+  .reset-btn{
+    font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--panel);
+    border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; margin-top:10px;
+  }
+  .reset-btn:hover{color:var(--text); border-color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Samp // DSA Interview Prep 2026 — Module: Strings</div>
+    <h1>String Master List</h1>
+    <div class="disclaimer">
+      <b>Honesty note:</b> no public source — including me — has a verified log of "every string question ever asked at every company." Company tags below reflect <b>patterns commonly reported</b> in interview-experience threads (LeetCode Discuss, GFG, Glassdoor), not confirmed per-question sourcing. Treat them as "companies known to draw from this pattern," not a guarantee any one of them asked exactly this. What's reliable: the question set itself — this covers the string patterns (two pointers, sliding window, hashing, pattern matching, stack-based parsing, tries) that show up across service-based, product-based, and FAANG-tier interviews.
+    </div>
+    <div class="overall-bar"><div class="overall-fill" id="overallFill"></div></div>
+  </header>
+
+  <div class="dashboard" id="dashboard"></div>
+
+  <div class="filter-bar" id="filterBar"></div>
+
+  <div id="topics"></div>
+
+  <footer>
+    Progress saved locally on this device (localStorage) · not synced across devices
+    <br>
+    <button class="reset-btn" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('stringMasterListProgress');render();}">Reset progress</button>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+{
+  key:'basics', title:'Basics & Manipulation', color:'var(--c-basics)',
+  questions:[
+    {n:'Reverse a String (in-place)', d:'Easy', lc:344, f:3, c:'Warm-up across nearly every company'},
+    {n:'Reverse Words in a String', d:'Medium', lc:151, f:3, c:'Amazon, Microsoft, Adobe, Flipkart'},
+    {n:'Reverse Words in a String III', d:'Easy', lc:557, f:2, c:'Amazon, Microsoft'},
+    {n:'String Compression', d:'Medium', lc:443, f:2, c:'Amazon, Microsoft, Adobe'},
+    {n:'Implement strStr() / Find Index of First Occurrence', d:'Easy', lc:28, f:2, c:'Amazon, service-based cos'},
+    {n:'Count and Say', d:'Medium', lc:38, f:1, c:'Amazon, Google (rare)'},
+    {n:'Roman to Integer', d:'Easy', lc:13, f:3, c:'Amazon, Microsoft, Adobe, Goldman Sachs'},
+    {n:'Integer to Roman', d:'Medium', lc:12, f:2, c:'Amazon, Microsoft'},
+    {n:'String to Integer (atoi)', d:'Medium', lc:8, f:4, c:'Amazon, Microsoft, Google, Meta, Adobe — very common edge-case-heavy ask'},
+    {n:'Zigzag Conversion', d:'Medium', lc:6, f:1, c:'Amazon (rare)'},
+    {n:'Multiply Strings', d:'Medium', lc:43, f:2, c:'Amazon, Google, Adobe'},
+    {n:'Add Binary', d:'Easy', lc:67, f:2, c:'Amazon, Microsoft, Facebook/Meta'},
+    {n:'Add Strings', d:'Easy', lc:415, f:1, c:'Amazon (rare)'},
+    {n:'Excel Sheet Column Number/Title', d:'Easy', lc:171, f:1, c:'Amazon, Microsoft (rare)'},
+    {n:'Length of Last Word', d:'Easy', lc:58, f:1, c:'Amazon (rare)'},
+    {n:'Rotate String', d:'Easy', lc:796, f:1, c:'Amazon, Google (rare)'},
+    {n:'Detect Capital', d:'Easy', lc:520, f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'two', title:'Two Pointers & Palindromes', color:'var(--c-two)',
+  questions:[
+    {n:'Valid Palindrome', d:'Easy', lc:125, f:4, c:'Amazon, Meta, Microsoft, Adobe, Paytm — extremely common'},
+    {n:'Valid Palindrome II (delete one char)', d:'Easy', lc:680, f:3, c:'Amazon, Meta, Google'},
+    {n:'Longest Palindromic Substring', d:'Medium', lc:5, f:4, c:'Amazon, Microsoft, Meta, Adobe, Goldman Sachs'},
+    {n:'Palindromic Substrings (count)', d:'Medium', lc:647, f:3, c:'Amazon, Meta, Microsoft'},
+    {n:'Shortest Palindrome', d:'Hard', lc:214, f:1, c:'Google (rare)'},
+    {n:'Palindrome Partitioning', d:'Medium', lc:131, f:2, c:'Amazon, Meta'},
+    {n:'Is Subsequence', d:'Easy', lc:392, f:2, c:'Amazon, Google, Adobe'},
+    {n:'Backspace String Compare', d:'Easy', lc:844, f:2, c:'Amazon, Microsoft, Google'},
+    {n:'Merge Strings Alternately', d:'Easy', lc:1768, f:1, c:'Amazon (rare)'},
+    {n:'Reverse Vowels of a String', d:'Easy', lc:345, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'window', title:'Sliding Window', color:'var(--c-window)',
+  questions:[
+    {n:'Longest Substring Without Repeating Characters', d:'Medium', lc:3, f:4, c:'Amazon, Microsoft, Google, Meta, Adobe — near-universal'},
+    {n:'Longest Repeating Character Replacement', d:'Medium', lc:424, f:3, c:'Amazon, Meta, Google'},
+    {n:'Minimum Window Substring', d:'Hard', lc:76, f:4, c:'Amazon, Meta, Microsoft, Google — iconic hard sliding window'},
+    {n:'Find All Anagrams in a String', d:'Medium', lc:438, f:3, c:'Amazon, Meta, Microsoft'},
+    {n:'Permutation in String', d:'Medium', lc:567, f:3, c:'Amazon, Meta, Google'},
+    {n:'Longest Substring with At Most K Distinct Characters', d:'Medium', lc:340, f:2, c:'Amazon, Google (subscription-gated LC)'},
+    {n:'Longest Substring with At Most Two Distinct Characters', d:'Medium', lc:159, f:1, c:'Google (rare)'},
+    {n:'Max Consecutive Ones (string/array hybrid)', d:'Easy', lc:485, f:1, c:'Amazon (rare)'},
+    {n:'Sliding Window with Character Frequency Constraints', d:'Medium', lc:'Custom (GFG)', f:1, c:'Service-based cos (occasional)'},
+    {n:'Smallest Window Containing All Characters', d:'Hard', lc:'Custom (GFG, same as LC76)', f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'anagram', title:'Anagrams / Hashing', color:'var(--c-anagram)',
+  questions:[
+    {n:'Valid Anagram', d:'Easy', lc:242, f:4, c:'Amazon, Microsoft, Google, Meta, Adobe — extremely common warm-up'},
+    {n:'Group Anagrams', d:'Medium', lc:49, f:4, c:'Amazon, Meta, Microsoft, Google, Uber — near-universal'},
+    {n:'Isomorphic Strings', d:'Easy', lc:205, f:3, c:'Amazon, Microsoft, Google'},
+    {n:'Word Pattern', d:'Easy', lc:290, f:2, c:'Amazon, Google'},
+    {n:'Ransom Note', d:'Easy', lc:383, f:2, c:'Amazon, Microsoft, Adobe'},
+    {n:'First Unique Character in a String', d:'Easy', lc:387, f:3, c:'Amazon, Microsoft, Adobe, Zoho'},
+    {n:'Two Strings Anagram Check (frequency array)', d:'Easy', lc:'Custom (GFG)', f:2, c:'Service-based cos, Samsung'},
+    {n:'Sort Characters By Frequency', d:'Medium', lc:451, f:2, c:'Amazon, Microsoft'},
+    {n:'Find Common Characters', d:'Easy', lc:1002, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'pattern', title:'Pattern Matching / String Algorithms', color:'var(--c-pattern)',
+  questions:[
+    {n:'Implement KMP Algorithm (pattern search)', d:'Hard', lc:'Custom (GFG)', f:2, c:'Goldman Sachs, Morgan Stanley, service-based cos — CS-fundamentals ask'},
+    {n:'Rabin-Karp Algorithm', d:'Hard', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+    {n:'Z-Function / Z-Algorithm', d:'Hard', lc:'Custom (GFG)', f:1, c:'Competitive-programming-heavy interviewers (rare)'},
+    {n:'Repeated Substring Pattern', d:'Easy', lc:459, f:2, c:'Amazon, Google'},
+    {n:'Shortest Palindrome (KMP-based)', d:'Hard', lc:214, f:1, c:'Google (rare)'},
+    {n:'Longest Prefix Suffix (LPS array)', d:'Hard', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+    {n:'Wildcard Matching', d:'Hard', lc:44, f:2, c:'Google, Meta, Uber'},
+    {n:'Regular Expression Matching', d:'Hard', lc:10, f:3, c:'Google, Meta, Microsoft'},
+    {n:'Find the Index of the First Occurrence (needle in haystack)', d:'Easy', lc:28, f:2, c:'Amazon (occasional)'},
+    {n:'Minimum Number of Character Deletions to Make Anagram', d:'Easy', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'stack', title:'Stack-Based / Parsing', color:'var(--c-stack)',
+  questions:[
+    {n:'Valid Parentheses', d:'Easy', lc:20, f:4, c:'Nearly universal — Amazon, Microsoft, Google, Meta, Adobe, Zoho'},
+    {n:'Generate Parentheses', d:'Medium', lc:22, f:3, c:'Amazon, Meta, Microsoft, Google'},
+    {n:'Longest Valid Parentheses', d:'Hard', lc:32, f:2, c:'Amazon, Google'},
+    {n:'Remove Invalid Parentheses', d:'Hard', lc:301, f:1, c:'Google, Meta (rare)'},
+    {n:'Decode String', d:'Medium', lc:394, f:3, c:'Amazon, Meta, Microsoft, Google'},
+    {n:'Basic Calculator', d:'Hard', lc:224, f:2, c:'Amazon, Google, Meta'},
+    {n:'Basic Calculator II', d:'Medium', lc:227, f:2, c:'Amazon, Meta'},
+    {n:'Simplify Path', d:'Medium', lc:71, f:2, c:'Amazon, Microsoft, Meta'},
+    {n:'Remove Duplicate Letters', d:'Medium', lc:316, f:1, c:'Google (rare)'},
+    {n:'Score of Parentheses', d:'Medium', lc:856, f:1, c:'Amazon (rare)'},
+    {n:'Minimum Add to Make Parentheses Valid', d:'Medium', lc:921, f:1, c:'Amazon (rare)'},
+    {n:'Remove All Adjacent Duplicates in String', d:'Easy', lc:1047, f:2, c:'Amazon, Microsoft'},
+    {n:'Remove All Adjacent Duplicates in String II', d:'Medium', lc:1209, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'trie', title:'Trie-Based', color:'var(--c-trie)',
+  questions:[
+    {n:'Implement Trie (Prefix Tree)', d:'Medium', lc:208, f:3, c:'Amazon, Google, Microsoft, Uber — foundational trie ask'},
+    {n:'Design Add and Search Words Data Structure', d:'Medium', lc:211, f:2, c:'Amazon, Google'},
+    {n:'Word Search II (Trie + backtracking)', d:'Hard', lc:212, f:3, c:'Amazon, Google, Meta — classic hard combining trie and matrix DFS'},
+    {n:'Replace Words (dictionary root matching)', d:'Medium', lc:648, f:1, c:'Amazon (rare)'},
+    {n:'Longest Word in Dictionary', d:'Medium', lc:720, f:1, c:'Amazon, Google (rare)'},
+    {n:'Map Sum Pairs', d:'Medium', lc:677, f:1, c:'Google (rare)'},
+    {n:'Design Search Autocomplete System', d:'Hard', lc:642, f:1, c:'Google, Amazon (rare, subscription-gated LC)'},
+    {n:'Maximum XOR of Two Numbers in an Array (bitwise trie)', d:'Medium', lc:421, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'adv', title:'Advanced / Miscellaneous', color:'var(--c-adv)',
+  questions:[
+    {n:'Word Break', d:'Medium', lc:139, f:3, c:'Amazon, Meta, Microsoft, Flipkart'},
+    {n:'Word Break II', d:'Hard', lc:140, f:1, c:'Meta (rare)'},
+    {n:'Word Ladder', d:'Hard', lc:127, f:3, c:'Amazon, Google, Meta — classic BFS-on-strings hard'},
+    {n:'Word Ladder II', d:'Hard', lc:126, f:1, c:'Google, Meta (rare)'},
+    {n:'Edit Distance', d:'Hard', lc:72, f:4, c:'Google, Amazon, Microsoft, Uber'},
+    {n:'Distinct Subsequences', d:'Hard', lc:115, f:2, c:'Google, Meta'},
+    {n:'Interleaving String', d:'Medium', lc:97, f:1, c:'Google, Microsoft (rare)'},
+    {n:'Longest Common Prefix', d:'Easy', lc:14, f:3, c:'Amazon, Microsoft, Adobe, Flipkart'},
+    {n:'Longest Common Subsequence', d:'Medium', lc:1143, f:4, c:'Amazon, Microsoft, Google, Adobe, Infosys, TCS'},
+    {n:'Text Justification', d:'Hard', lc:68, f:1, c:'Google, Amazon (rare, tricky formatting ask)'},
+    {n:'One Edit Distance', d:'Medium', lc:161, f:1, c:'Google, Meta (rare, subscription-gated LC)'},
+    {n:'Encode and Decode Strings', d:'Medium', lc:271, f:1, c:'Meta, Google (rare, subscription-gated LC)'},
+    {n:'String Matching in an Array', d:'Easy', lc:1408, f:1, c:'Amazon (rare)'},
+    {n:'Minimum Number of Swaps to Make String Balanced', d:'Medium', lc:1963, f:1, c:'Amazon (rare)'},
+    {n:'Check If a String Can Break Another String', d:'Medium', lc:1433, f:1, c:'Amazon (rare)'},
+    {n:'Custom Sort String', d:'Medium', lc:791, f:1, c:'Amazon, Google (rare)'},
+    {n:'License Key Formatting', d:'Easy', lc:482, f:1, c:'Amazon, Uber (rare)'},
+    {n:'Number of Matching Subsequences', d:'Medium', lc:792, f:1, c:'Google (rare)'},
+    {n:'Verify an Alien Dictionary', d:'Easy', lc:953, f:1, c:'Amazon (rare)'},
+  ]
+},
+];
+
+const FREQ_LABEL = {1:'Rare',2:'Occasional',3:'Frequent',4:'Very Frequent'};
+const STORAGE_KEY = 'stringMasterListProgress';
+const COLLAPSE_KEY = 'stringMasterListCollapse';
+let activeFilter = null; // null = show all, else 1-4
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveProgress(p){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+function loadCollapse(){
+  try{ return JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveCollapse(c){
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify(c));
+}
+
+function qid(topicKey, idx){ return topicKey+'-'+idx; }
+
+function render(){
+  const progress = loadProgress();
+  const collapse = loadCollapse();
+
+  let totalQ=0, totalDone=0;
+  const dashEl = document.getElementById('dashboard');
+  const topicsEl = document.getElementById('topics');
+  topicsEl.innerHTML='';
+
+  DATA.forEach(topic=>{
+    const done = topic.questions.filter((q,i)=>progress[qid(topic.key,i)]).length;
+    totalQ += topic.questions.length;
+    totalDone += done;
+
+    const isCollapsed = !!collapse[topic.key];
+    const topicDiv = document.createElement('div');
+    topicDiv.className = 'topic' + (isCollapsed ? ' collapsed':'');
+
+    const pct = Math.round((done/topic.questions.length)*100);
+
+    topicDiv.innerHTML = `
+      <div class="topic-head" data-key="${topic.key}">
+        <div class="topic-title-group">
+          <span class="dot" style="background:${topic.color}"></span>
+          <span class="topic-title">${topic.title}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="topic-count">${done}/${topic.questions.length}</span>
+          <div class="topic-progress"><div class="topic-progress-fill" style="width:${pct}%;background:${topic.color}"></div></div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="qlist"></div>
+    `;
+
+    const qlist = topicDiv.querySelector('.qlist');
+    topic.questions.forEach((q,i)=>{
+      const id = qid(topic.key,i);
+      const isDone = !!progress[id];
+      const row = document.createElement('div');
+      row.className = 'qrow' + (isDone?' done':'');
+      row.style.setProperty('--accent', topic.color);
+
+      let dots='';
+      for(let d=1; d<=4; d++){
+        dots += `<span class="freq-dot ${d<=q.f?'on':''}" style="${d<=q.f?`background:${topic.color}`:''}"></span>`;
+      }
+
+      row.dataset.freq = q.f;
+      if(activeFilter && Number(activeFilter) !== q.f){
+        row.classList.add('hidden-by-filter');
+      }
+
+      row.innerHTML = `
+        <button class="chk ${isDone?'checked':''}" data-id="${id}" style="--accent:${topic.color}"></button>
+        <span class="qname">${q.n}<span class="lc">${q.lc==='Custom'?'· Custom':'· LC '+q.lc}</span></span>
+        <span class="badge diff-${q.d}">${q.d}</span>
+        <span class="freq" title="${FREQ_LABEL[q.f]}">
+          <span class="freq-dots">${dots}</span>
+          <span class="freq-label">${FREQ_LABEL[q.f]}</span>
+        </span>
+        <span class="companies">${q.c}</span>
+      `;
+      qlist.appendChild(row);
+    });
+
+    topicsEl.appendChild(topicDiv);
+  });
+
+  // dashboard
+  dashEl.innerHTML = `
+    <div class="stat"><div class="num">${totalQ}</div><div class="lbl">Total Questions</div></div>
+    <div class="stat"><div class="num">${totalDone}</div><div class="lbl">Completed</div></div>
+    <div class="stat"><div class="num">${totalQ-totalDone}</div><div class="lbl">Remaining</div></div>
+    <div class="stat"><div class="num">${totalQ?Math.round((totalDone/totalQ)*100):0}%</div><div class="lbl">Progress</div></div>
+  `;
+  document.getElementById('overallFill').style.width = (totalQ?Math.round((totalDone/totalQ)*100):0)+'%';
+
+  // filter bar
+  const filterBar = document.getElementById('filterBar');
+  const chips = [{f:null,l:'All'},{f:4,l:'Very Frequent'},{f:3,l:'Frequent'},{f:2,l:'Occasional'},{f:1,l:'Rare'}];
+  filterBar.innerHTML = chips.map(ch=>
+    `<button class="filter-chip ${activeFilter===ch.f?'active':''}" data-f="${ch.f}">${ch.l}</button>`
+  ).join('');
+  filterBar.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const val = chip.dataset.f;
+      activeFilter = (val==='null') ? null : Number(val);
+      render();
+    });
+  });
+
+  // wire events
+  document.querySelectorAll('.chk').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const p = loadProgress();
+      const id = btn.dataset.id;
+      p[id] = !p[id];
+      saveProgress(p);
+      render();
+    });
+  });
+  document.querySelectorAll('.topic-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const c = loadCollapse();
+      const key = head.dataset.key;
+      c[key] = !c[key];
+      saveCollapse(c);
+      render();
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
