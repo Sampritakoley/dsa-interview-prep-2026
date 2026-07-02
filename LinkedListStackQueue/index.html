@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA Tracker // LinkedList · Stack · Queue</title>
+<style>
+  :root{
+    --bg:#0B0E14;
+    --panel:#12161F;
+    --panel-alt:#171C27;
+    --border:#232838;
+    --text:#E6E9F0;
+    --muted:#8891A4;
+    --faint:#5A6376;
+    --accent:#4FD1C5;
+    --accent-dim:#2C6E68;
+    --amber:#F0A868;
+    --coral:#F0616B;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  ::selection{background:var(--accent-dim);color:#fff;}
+
+  header{
+    position:sticky; top:0; z-index:20;
+    background:rgba(11,14,20,0.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+    padding:18px 28px;
+  }
+  .header-row{display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap;}
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand .tag{font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:0.08em;}
+  .brand h1{font-size:18px; font-weight:600; margin:0; letter-spacing:-0.01em;}
+  .brand h1 span{color:var(--muted); font-weight:400;}
+
+  .global-progress{display:flex; align-items:center; gap:12px; font-family:var(--mono); font-size:13px; color:var(--muted);}
+  .bar-track{width:180px; height:6px; background:var(--panel-alt); border-radius:3px; overflow:hidden; border:1px solid var(--border);}
+  .bar-fill{height:100%; background:linear-gradient(90deg,var(--accent-dim),var(--accent)); width:0%; transition:width .35s ease;}
+  #globalCount{color:var(--text); font-weight:600;}
+
+  .controls{
+    display:flex; gap:10px; padding:14px 28px; flex-wrap:wrap;
+    border-bottom:1px solid var(--border); background:var(--panel);
+  }
+  input[type="search"]{
+    flex:1; min-width:180px; background:var(--panel-alt); border:1px solid var(--border);
+    color:var(--text); padding:9px 12px; border-radius:6px; font-family:var(--sans); font-size:13px;
+  }
+  input[type="search"]::placeholder{color:var(--faint);}
+  input[type="search"]:focus{outline:none; border-color:var(--accent-dim);}
+
+  select, .chip-btn{
+    background:var(--panel-alt); border:1px solid var(--border); color:var(--muted);
+    padding:9px 12px; border-radius:6px; font-family:var(--mono); font-size:12px; cursor:pointer;
+  }
+  .chip-btn.active{border-color:var(--accent); color:var(--accent);}
+  select:focus{outline:none;}
+
+  nav.topics{display:flex; gap:6px; padding:14px 28px 0; background:var(--bg);}
+  .topic-btn{
+    font-family:var(--mono); font-size:12.5px; padding:9px 16px; border-radius:8px 8px 0 0;
+    background:var(--panel); color:var(--muted); border:1px solid var(--border); border-bottom:none;
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+  }
+  .topic-btn .count{color:var(--faint);}
+  .topic-btn.active{background:var(--panel-alt); color:var(--text); border-color:var(--border);}
+  .topic-btn.active .count{color:var(--accent);}
+
+  main{max-width:1280px; margin:0 auto; padding:0 28px 80px;}
+
+  section.topic{display:none; background:var(--panel-alt); border:1px solid var(--border); border-radius:0 8px 8px 8px; padding:22px 22px 8px; margin-top:0;}
+  section.topic.active{display:block;}
+
+  .topic-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:14px; flex-wrap:wrap; gap:10px;}
+  .topic-head .subprog{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .topic-head .subprog b{color:var(--accent);}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    text-align:left; font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--faint); padding:8px 10px; border-bottom:1px solid var(--border); font-weight:500;
+  }
+  tbody tr{border-bottom:1px solid var(--border); transition:background .15s;}
+  tbody tr:hover{background:rgba(79,209,197,0.04);}
+  tbody tr.done{opacity:0.42;}
+  tbody tr.done .qname{text-decoration:line-through; text-decoration-color:var(--faint);}
+  tbody tr.hidden{display:none;}
+  td{padding:9px 10px; vertical-align:middle;}
+  td.num{color:var(--faint); font-family:var(--mono); font-size:12px; width:28px;}
+  td.qname{font-weight:500;}
+  td.lc{font-family:var(--mono); font-size:12px; color:var(--muted); white-space:nowrap;}
+  td.companies{font-size:12px; color:var(--muted);}
+  .co-chip{display:inline-block; background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:1px 7px; margin:1px 3px 1px 0; font-size:10.5px; color:var(--muted); white-space:nowrap;}
+
+  .badge{display:inline-block; padding:2px 8px; border-radius:10px; font-family:var(--mono); font-size:11px; border:1px solid transparent;}
+  .diff-Easy{color:var(--accent); border-color:var(--accent-dim); background:rgba(79,209,197,0.08);}
+  .diff-Medium{color:var(--amber); border-color:#6b4f2c; background:rgba(240,168,104,0.08);}
+  .diff-Hard{color:var(--coral); border-color:#6b2f34; background:rgba(240,97,107,0.08);}
+
+  .freq{font-size:11px; font-family:var(--mono); color:var(--muted);}
+  .freq-dots{display:inline-flex; gap:3px; margin-right:6px; vertical-align:middle;}
+  .freq-dots span{width:5px; height:5px; border-radius:50%; background:var(--border); display:inline-block;}
+  .freq-dots span.on{background:var(--accent);}
+
+  .tier{font-family:var(--mono); font-size:11px; color:var(--faint);}
+
+  input[type="checkbox"].done-check{
+    appearance:none; width:18px; height:18px; border:1.5px solid var(--border); border-radius:5px;
+    background:var(--panel); cursor:pointer; position:relative; flex-shrink:0;
+  }
+  input[type="checkbox"].done-check:checked{background:var(--accent); border-color:var(--accent);}
+  input[type="checkbox"].done-check:checked::after{
+    content:''; position:absolute; left:5px; top:1px; width:5px; height:9px;
+    border:solid #0B0E14; border-width:0 2px 2px 0; transform:rotate(45deg);
+  }
+
+  footer{max-width:1280px; margin:0 auto; padding:20px 28px 60px; font-family:var(--mono); font-size:11.5px; color:var(--faint); line-height:1.7;}
+  footer a{color:var(--accent); text-decoration:none;}
+
+  @media (max-width:900px){
+    .topic-head, .header-row{flex-direction:column; align-items:flex-start;}
+    thead th:nth-child(6), thead th:nth-child(8), td.tier, td.freq{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div class="brand">
+      <span class="tag">// dsa_prep.tracker</span>
+      <h1>LinkedList <span>·</span> Stack <span>·</span> Queue</h1>
+    </div>
+    <div class="global-progress">
+      <span id="globalCount">0 / 0 solved</span>
+      <div class="bar-track"><div class="bar-fill" id="globalBar"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="search" id="search" placeholder="Filter by keyword…">
+  <select id="diffFilter">
+    <option value="">All difficulties</option>
+    <option>Easy</option>
+    <option>Medium</option>
+    <option>Hard</option>
+  </select>
+  <select id="freqFilter">
+    <option value="">All frequencies</option>
+    <option>Very Frequent</option>
+    <option>Frequent</option>
+    <option>Occasional</option>
+    <option>Rare</option>
+    <option>Rare–Occasional</option>
+  </select>
+  <select id="companyFilter">
+    <option value="">All companies</option>
+  </select>
+  <button class="chip-btn" id="hideDone">Hide done</button>
+</div>
+
+<nav class="topics" id="topicNav"></nav>
+
+<main id="mainArea"></main>
+
+<footer>
+  <b>NOTE ON COMPANY TAGS:</b> these reflect commonly-reported associations pulled together from widespread interview-prep patterns (the same kind of thing LeetCode's Company Tag feature, GfG interview-experience threads, and Glassdoor aggregate) — not a verified log of "Company X asked this on date Y." Treat them as "this pattern is well-known to show up at these companies," not ground truth. For live, company-specific data, cross-check LeetCode's Company Tags directly.<br><br>
+  <b>NOTE ON PROGRESS:</b> checkbox state lives in this page's memory only and resets on reload — no external storage is used.
+</footer>
+
+<script>
+const DATA = {
+  "LinkedList": [
+    ["Reverse Linked List","Easy","206","Very Frequent","1 & 2",["Amazon","Microsoft","Google","Adobe","Morgan Stanley"]],
+    ["Reverse Linked List II (between positions)","Medium","92","Frequent","1 & 2",["Meta","Microsoft","Salesforce","Oracle","Intuit"]],
+    ["Merge Two Sorted Lists","Easy","21","Very Frequent","1 & 2",["Amazon","Microsoft","Apple","Oracle"]],
+    ["Merge k Sorted Lists","Hard","23","Frequent","1",["Google","Amazon","Meta"]],
+    ["Linked List Cycle (detect)","Easy","141","Very Frequent","1 & 2",["Amazon","Microsoft","Bloomberg"]],
+    ["Linked List Cycle II (find start node)","Medium","142","Frequent","1 & 2",["Amazon","Microsoft"]],
+    ["Middle of the Linked List","Easy","876","Frequent","1 & 2",["Amazon","Microsoft"]],
+    ["Remove Nth Node From End of List","Medium","19","Frequent","1 & 2",["Meta","Amazon","Google"]],
+    ["Palindrome Linked List","Easy","234","Frequent","1 & 2",["Amazon","Microsoft","Meta","Morgan Stanley"]],
+    ["Intersection of Two Linked Lists","Easy","160","Frequent","1 & 2",["Amazon","Microsoft","VMware","Samsung","Goldman Sachs"]],
+    ["Copy List with Random Pointer","Medium","138","Very Frequent","1",["Amazon","Meta","Uber","Google"]],
+    ["Add Two Numbers (as linked lists)","Medium","2","Very Frequent","1 & 2",["Amazon","Microsoft","Bloomberg","Swiggy"]],
+    ["Add Two Numbers II","Medium","445","Occasional","1 & 2",["Amazon"]],
+    ["Flatten a Multilevel Doubly Linked List","Medium","430","Occasional","1",["Meta","Google"]],
+    ["Sort List (merge sort on LL)","Medium","148","Frequent","1",["Google","Meta"]],
+    ["Reorder List","Medium","143","Frequent","1 & 2",["Amazon","Meta"]],
+    ["Rotate List","Medium","61","Occasional","1 & 2",["Amazon","Microsoft"]],
+    ["Partition List (around x)","Medium","86","Occasional","2",["Amazon"]],
+    ["Remove Duplicates from Sorted List","Easy","83","Occasional","2",["Microsoft","Amazon"]],
+    ["Remove Duplicates from Sorted List II","Medium","82","Occasional","2",["Amazon"]],
+    ["Odd Even Linked List","Medium","328","Occasional","2",["Amazon"]],
+    ["Swap Nodes in Pairs","Medium","24","Frequent","1 & 2",["Amazon","Microsoft","Intuit"]],
+    ["Reverse Nodes in k-Group","Hard","25","Frequent","1",["Google","Amazon","Meta","Zomato","Salesforce","Walmart","PayPal"]],
+    ["Design Linked List (custom implementation)","Medium","707","Occasional","2",["Amazon","Bloomberg"]],
+    ["LRU Cache (DLL + HashMap)","Medium","146","Very Frequent","1 & 2",["Amazon","Google","Microsoft","Uber","Bloomberg","Adobe","Razorpay","Zomato","Salesforce","Walmart","Intuit","Morgan Stanley","PayPal"]],
+    ["LFU Cache","Hard","460","Rare–Occasional","1",["Amazon","Google"]],
+    ["Convert Binary Number in a Linked List to Integer","Easy","1290","Rare","2",["Amazon"]],
+    ["Delete Node in a Linked List (no head access)","Easy","237","Occasional","1 & 2",["Amazon","Apple","Oracle","Samsung","Morgan Stanley"]],
+    ["Split Linked List in Parts","Medium","725","Rare","2",["Google"]],
+    ["Next Greater Node In Linked List","Medium","1019","Occasional","1",["Amazon"]],
+    ["Insertion Sort List","Medium","147","Rare","2",["Amazon"]],
+    ["Convert Sorted List to Binary Search Tree","Medium","109","Occasional","1",["Amazon","Microsoft"]],
+    ["Design Browser History (DLL-based)","Medium","1472","Rare","1 & 2",["Meta","Amazon"]],
+    ["Merge In Between Linked Lists","Medium","1669","Rare","1",["Amazon"]],
+    ["Detect and Remove Loop (explicit removal)","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart","Paytm","Zomato","Oracle","Samsung"]],
+    ["Clone a Linked List with Next and Random Pointer (array variant)","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart","PayPal","Samsung","Morgan Stanley"]],
+    ["Rearrange a Linked List (alternate first/last, \"Fold List\")","Medium","Custom / 143 variant","Occasional","2",["Amazon","Flipkart"]],
+    ["Multiply Two Numbers Represented as Linked Lists","Medium","Custom (GfG)","Rare","2",["Flipkart","Amazon"]],
+    ["Josephus Problem using Circular Linked List","Medium","Custom","Rare","2",["Amazon","Directi","PayPal"]],
+    ["Segregate Even and Odd Nodes (by value)","Medium","Custom (GfG)","Rare","2",["Amazon","Flipkart"]],
+    ["Flattening a Linked List (node has a \"down\" sorted sub-list)","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart","Salesforce","Walmart"]],
+    ["Check if a Linked List is Circular","Easy","Custom","Rare","2",["Amazon"]]
+  ],
+  "Stack": [
+    ["Valid Parentheses","Easy","20","Very Frequent","1 & 2",["Amazon","Google","Microsoft","Meta","Bloomberg","Oracle","Razorpay","Atlassian"]],
+    ["Min Stack","Medium","155","Very Frequent","1 & 2",["Amazon","Bloomberg","Google","Meta","Oracle","Goldman Sachs","Intuit"]],
+    ["Evaluate Reverse Polish Notation","Medium","150","Frequent","1 & 2",["Amazon","LinkedIn","PayPal"]],
+    ["Basic Calculator","Hard","224","Frequent","1",["Google","Amazon","Meta"]],
+    ["Basic Calculator II","Medium","227","Frequent","1 & 2",["Amazon","Meta","Google"]],
+    ["Basic Calculator III","Hard","772","Occasional","1",["Google"]],
+    ["Daily Temperatures","Medium","739","Very Frequent","1 & 2",["Amazon","Google","Meta"]],
+    ["Next Greater Element I","Easy","496","Frequent","1 & 2",["Amazon","Meta"]],
+    ["Next Greater Element II (circular array)","Medium","503","Occasional","1",["Amazon"]],
+    ["Largest Rectangle in Histogram","Hard","84","Very Frequent","1",["Google","Amazon","Meta","Microsoft","Zomato"]],
+    ["Maximal Rectangle (2D, histogram stack)","Hard","85","Occasional","1",["Google","Amazon"]],
+    ["Trapping Rain Water (stack approach)","Hard","42","Very Frequent","1",["Amazon","Google","Meta","Goldman Sachs"]],
+    ["Remove Duplicate Letters","Medium","316","Occasional","1",["Google"]],
+    ["Decode String","Medium","394","Frequent","1 & 2",["Amazon","Meta","Google"]],
+    ["Simplify Path (Unix-style path)","Medium","71","Frequent","1 & 2",["Meta","Amazon","Microsoft"]],
+    ["Asteroid Collision","Medium","735","Frequent","1 & 2",["Amazon","Meta"]],
+    ["Backspace String Compare","Easy","844","Occasional","2",["Google","Amazon"]],
+    ["Implement Stack using Queues","Easy","225","Occasional","2",["Amazon","Microsoft","Samsung","Intuit","Zoho","Oracle"]],
+    ["Implement Queue using Stacks","Easy","232","Frequent","1 & 2",["Amazon","Microsoft","Meta","Samsung","Morgan Stanley","Oracle"]],
+    ["Online Stock Span","Medium","901","Frequent","1 & 2",["Amazon","Flipkart"]],
+    ["Remove K Digits","Medium","402","Occasional","1",["Amazon","Google"]],
+    ["132 Pattern","Medium","456","Rare–Occasional","1",["Amazon"]],
+    ["Score of Parentheses","Medium","856","Rare","1",["Google"]],
+    ["Exclusive Time of Functions","Medium","636","Occasional","1",["Meta","Amazon"]],
+    ["Design a Stack With Increment Operation","Medium","1381","Rare","1",["Amazon"]],
+    ["Sum of Subarray Minimums","Medium","907","Occasional","1",["Amazon","Google"]],
+    ["Flatten Nested List Iterator","Medium","341","Occasional","1",["Meta","Google"]],
+    ["Baseball Game","Easy","682","Rare","2",["Amazon"]],
+    ["Crawler Log Folder","Easy","1598","Rare","2",["Amazon"]],
+    ["Check If Word Is Valid After Substitutions","Medium","1003","Rare","1",["Amazon"]],
+    ["Minimum Remove to Make Valid Parentheses","Medium","1249","Frequent","1",["Meta","Amazon"]],
+    ["Longest Valid Parentheses","Hard","32","Frequent","1",["Google","Amazon","Meta"]],
+    ["Redundant Braces / Parenthesis Check","Easy","Custom (GfG)","Occasional","2",["Amazon","Flipkart","Paytm"]],
+    ["Celebrity Problem","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart","Adobe"]],
+    ["Sort a Stack Using Recursion","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart"]],
+    ["Reverse a Stack Using Recursion","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart"]],
+    ["Stack Supporting getMin/getMax in O(1) (Min Stack variant)","Medium","Custom","Occasional","2",["Amazon","Bloomberg"]],
+    ["Stock Buy/Sell — Max Profit via Stack-Based Span Logic","Medium","Custom (GfG)","Rare","2",["Flipkart","Amazon"]],
+    ["Balanced Brackets, Multiple Bracket Types (extended Valid Parens)","Easy","Custom","Occasional","2",["Amazon","Microsoft"]]
+  ],
+  "Queue": [
+    ["Implement Queue using Stacks","Easy","232","Frequent","1 & 2",["Amazon","Microsoft","Samsung","Morgan Stanley"]],
+    ["Implement Stack using Queues","Easy","225","Occasional","2",["Amazon"]],
+    ["Design Circular Queue","Medium","622","Frequent","1 & 2",["Google","Amazon"]],
+    ["Design Circular Deque","Medium","641","Occasional","1",["Google"]],
+    ["Sliding Window Maximum (monotonic deque)","Hard","239","Very Frequent","1",["Amazon","Google","Meta","Microsoft"]],
+    ["Moving Average from Data Stream","Easy","346","Occasional","1 & 2",["Google","Meta"]],
+    ["Number of Recent Calls","Easy","933","Rare","2",["Google"]],
+    ["Task Scheduler","Medium","621","Frequent","1 & 2",["Amazon","Meta","Google"]],
+    ["Design Hit Counter","Medium","362","Occasional","1",["Meta","Amazon"]],
+    ["Dota2 Senate","Medium","649","Rare","1",["Amazon"]],
+    ["Shortest Subarray with Sum at Least K (monotonic deque)","Hard","862","Occasional","1",["Google","Amazon"]],
+    ["Jump Game VI (deque optimization)","Medium","1696","Occasional","1",["Amazon"]],
+    ["Constrained Subsequence Sum (deque optimization)","Hard","1425","Rare","1",["Google"]],
+    ["Reveal Cards In Increasing Order (queue simulation)","Medium","950","Occasional","1 & 2",["Amazon"]],
+    ["Rotting Oranges (BFS via queue)","Medium","994","Very Frequent","1 & 2",["Amazon","Google","Meta","Microsoft"]],
+    ["Walls and Gates (BFS via queue)","Medium","286","Frequent","1",["Google","Meta"]],
+    ["Design Snake Game","Medium","353","Rare","1",["Amazon","Meta","Atlassian"]],
+    ["Design Front Middle Back Queue","Medium","1670","Rare","1",["Google"]],
+    ["Time Needed to Buy Tickets","Easy","2073","Occasional","2",["Amazon"]],
+    ["First Negative Number in Every Window of Size K (monotonic deque)","Medium","Custom (GfG)","Occasional","2",["Amazon","Flipkart"]],
+    ["Circular Tour / Petrol Pump Problem (Gas Station, queue-style greedy)","Medium","134 (variant)","Frequent","2",["Amazon","Flipkart","Samsung"]],
+    ["Generate Binary Numbers from 1 to N using a Queue","Easy","Custom (GfG)","Rare","2",["Amazon","Flipkart"]],
+    ["LRU Cache using Queue + HashMap (alternate framing)","Medium","146 (variant)","Frequent","1 & 2",["Amazon","Uber","Bloomberg"]],
+    ["Interleave First Half of a Queue with Second Half","Medium","Custom (GfG)","Rare","2",["Amazon","Flipkart"]],
+    ["Design a Queue Using Two Stacks (reverse framing)","Easy","Custom","Occasional","2",["Amazon","Microsoft","Zoho","Samsung","Morgan Stanley"]]
+  ]
+};
+
+const FREQ_LEVELS = {"Rare":1, "Rare–Occasional":1.5, "Occasional":2, "Frequent":3, "Very Frequent":4};
+
+const topicNav = document.getElementById('topicNav');
+const mainArea = document.getElementById('mainArea');
+let activeTopic = Object.keys(DATA)[0];
+let hideDone = false;
+
+function freqDots(freq){
+  const level = FREQ_LEVELS[freq] || 1;
+  let dots = '';
+  for(let i=1;i<=4;i++){
+    dots += `<span class="${i<=level ? 'on':''}"></span>`;
+  }
+  return `<span class="freq-dots">${dots}</span>`;
+}
+
+function buildTopicNav(){
+  topicNav.innerHTML = '';
+  Object.keys(DATA).forEach(topic=>{
+    const btn = document.createElement('div');
+    btn.className = 'topic-btn' + (topic===activeTopic ? ' active':'');
+    btn.dataset.topic = topic;
+    btn.innerHTML = `${topic} <span class="count">${DATA[topic].length}</span>`;
+    btn.addEventListener('click', ()=>{ activeTopic = topic; render(); });
+    topicNav.appendChild(btn);
+  });
+}
+
+function buildSections(){
+  mainArea.innerHTML = '';
+  Object.keys(DATA).forEach(topic=>{
+    const section = document.createElement('section');
+    section.className = 'topic' + (topic===activeTopic ? ' active':'');
+    section.dataset.topic = topic;
+
+    const rows = DATA[topic].map((item, idx)=>{
+      const [name, diff, lc, freq, tier, companies] = item;
+      const id = `${topic}-${idx}`;
+      const coStr = companies.join('|').toLowerCase();
+      const coChips = companies.map(c=>`<span class="co-chip">${c}</span>`).join('');
+      return `<tr data-id="${id}" data-name="${name.toLowerCase()}" data-diff="${diff}" data-freq="${freq}" data-companies="${coStr}">
+        <td class="num">${idx+1}</td>
+        <td><input type="checkbox" class="done-check" data-id="${id}"></td>
+        <td class="qname">${name}</td>
+        <td><span class="badge diff-${diff}">${diff}</span></td>
+        <td class="lc">${lc}</td>
+        <td class="freq">${freqDots(freq)}${freq}</td>
+        <td class="companies">${coChips}</td>
+        <td class="tier">Tier ${tier}</td>
+      </tr>`;
+    }).join('');
+
+    section.innerHTML = `
+      <div class="topic-head">
+        <div><strong style="font-family:var(--mono); font-size:13px; color:var(--muted);">## ${topic}</strong></div>
+        <div class="subprog" data-progress="${topic}"><b>0</b> / ${DATA[topic].length} solved</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th></th><th>Question</th><th>Difficulty</th><th>LC #</th><th>Frequency</th><th>Companies (commonly reported)</th><th>Tier</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    mainArea.appendChild(section);
+  });
+}
+
+function populateCompanyFilter(){
+  const set = new Set();
+  Object.values(DATA).forEach(items=>{
+    items.forEach(item=>{ item[5].forEach(c=>set.add(c)); });
+  });
+  const sorted = Array.from(set).sort();
+  const sel = document.getElementById('companyFilter');
+  sel.innerHTML = '<option value="">All companies</option>' +
+    sorted.map(c=>`<option value="${c.toLowerCase()}">${c}</option>`).join('');
+}
+
+function updateProgress(){
+  let totalDone = 0, totalAll = 0;
+  Object.keys(DATA).forEach(topic=>{
+    const checks = document.querySelectorAll(`section[data-topic="${topic}"] .done-check`);
+    let doneCount = 0;
+    checks.forEach(c=>{ if(c.checked) doneCount++; });
+    totalDone += doneCount; totalAll += checks.length;
+    const progEl = document.querySelector(`[data-progress="${topic}"] b`);
+    if(progEl) progEl.textContent = doneCount;
+  });
+  document.getElementById('globalCount').textContent = `${totalDone} / ${totalAll} solved`;
+  document.getElementById('globalBar').style.width = totalAll ? `${(totalDone/totalAll*100).toFixed(1)}%` : '0%';
+}
+
+function applyFilters(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const diff = document.getElementById('diffFilter').value;
+  const freq = document.getElementById('freqFilter').value;
+  const company = document.getElementById('companyFilter').value;
+  document.querySelectorAll('section.topic tbody tr').forEach(row=>{
+    const matchesQ = !q || row.dataset.name.includes(q);
+    const matchesDiff = !diff || row.dataset.diff === diff;
+    const matchesFreq = !freq || row.dataset.freq === freq;
+    const matchesCompany = !company || row.dataset.companies.split('|').includes(company);
+    const isDone = row.classList.contains('done');
+    const matchesDone = !hideDone || !isDone;
+    row.classList.toggle('hidden', !(matchesQ && matchesDiff && matchesFreq && matchesCompany && matchesDone));
+  });
+}
+
+function render(){
+  buildTopicNav();
+  buildSections();
+  attachCheckHandlers();
+  updateProgress();
+  applyFilters();
+}
+
+function attachCheckHandlers(){
+  document.querySelectorAll('.done-check').forEach(cb=>{
+    cb.addEventListener('change', (e)=>{
+      const row = e.target.closest('tr');
+      row.classList.toggle('done', e.target.checked);
+      updateProgress();
+      applyFilters();
+    });
+  });
+}
+
+document.getElementById('search').addEventListener('input', applyFilters);
+document.getElementById('diffFilter').addEventListener('change', applyFilters);
+document.getElementById('freqFilter').addEventListener('change', applyFilters);
+document.getElementById('companyFilter').addEventListener('change', applyFilters);
+document.getElementById('hideDone').addEventListener('click', (e)=>{
+  hideDone = !hideDone;
+  e.target.classList.toggle('active', hideDone);
+  applyFilters();
+});
+
+populateCompanyFilter();
+render();
+</script>
+</body>
+</html>
