@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DP Master List — Interview Prep 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg:#0b0e14;
+    --panel:#11151d;
+    --panel2:#161b25;
+    --border:#232938;
+    --text:#dbe2f0;
+    --muted:#7c8699;
+    --mono: 'JetBrains Mono','Fira Code',ui-monospace,Consolas,monospace;
+    --sans: 'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+
+    --c-1d:#4fd1c5;
+    --c-grid:#a78bfa;
+    --c-knap:#f6ad55;
+    --c-string:#f687b3;
+    --c-interval:#68d391;
+    --c-stock:#63b3ed;
+    --c-tree:#fc8181;
+    --c-adv:#ff8b6b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans);
+    padding:28px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.12em;
+    color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+  }
+  h1{
+    font-family:var(--mono); font-size:28px; font-weight:700; margin:0 0 10px;
+    color:#fff; letter-spacing:-0.01em;
+  }
+  .disclaimer{
+    background:var(--panel); border:1px solid var(--border); border-left:3px solid var(--c-knap);
+    border-radius:6px; padding:14px 16px; font-size:13.5px; color:var(--muted); line-height:1.55;
+    margin-bottom:22px;
+  }
+  .disclaimer b{color:var(--text);}
+
+  .dashboard{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; margin-bottom:26px;
+  }
+  .stat{
+    background:var(--panel); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px;
+  }
+  .stat .num{font-family:var(--mono); font-size:22px; font-weight:700; color:#fff;}
+  .stat .lbl{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+  .overall-bar{
+    height:6px; background:var(--panel2); border-radius:3px; overflow:hidden; margin-top:14px; border:1px solid var(--border);
+  }
+  .overall-fill{height:100%; background:linear-gradient(90deg,var(--c-1d),var(--c-tree)); width:0%; transition:width .3s;}
+
+  .topic{
+    margin-bottom:22px; background:var(--panel); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+  }
+  .topic-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 18px; cursor:pointer; user-select:none;
+    border-bottom:1px solid var(--border);
+  }
+  .topic-head:hover{background:var(--panel2);}
+  .topic-title-group{display:flex; align-items:center; gap:10px;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .topic-title{font-family:var(--mono); font-weight:700; font-size:15px; color:#fff;}
+  .topic-count{font-family:var(--mono); font-size:12px; color:var(--muted);}
+  .topic-progress{width:70px; height:5px; border-radius:3px; background:var(--panel2); overflow:hidden; border:1px solid var(--border);}
+  .topic-progress-fill{height:100%;}
+  .chevron{color:var(--muted); font-size:12px; transition:transform .2s;}
+  .topic.collapsed .chevron{transform:rotate(-90deg);}
+  .topic.collapsed .qlist{display:none;}
+
+  .qlist{padding:4px 0;}
+  .qrow{
+    display:grid;
+    grid-template-columns:28px 1fr auto auto auto auto;
+    align-items:center; gap:12px;
+    padding:10px 18px; border-bottom:1px solid var(--border);
+    font-size:13.5px;
+  }
+  .qrow:last-child{border-bottom:none;}
+  .qrow.done{opacity:.45;}
+  .qrow.done .qname{text-decoration:line-through;}
+
+  .chk{
+    width:17px; height:17px; border-radius:4px; border:1.5px solid var(--muted);
+    cursor:pointer; background:transparent; position:relative; flex-shrink:0;
+  }
+  .chk.checked{background:var(--accent,var(--c-1d)); border-color:var(--accent,var(--c-1d));}
+  .chk.checked::after{
+    content:'✓'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#0b0e14; font-weight:900;
+  }
+
+  .qname{color:var(--text); font-weight:500;}
+  .qname .lc{color:var(--muted); font-family:var(--mono); font-size:11.5px; margin-left:6px;}
+
+  .badge{
+    font-family:var(--mono); font-size:10.5px; padding:3px 7px; border-radius:4px;
+    white-space:nowrap; text-align:center; border:1px solid transparent;
+  }
+  .diff-Easy{color:#68d391; border-color:#68d39144; background:#68d39114;}
+  .diff-Medium{color:#f6ad55; border-color:#f6ad5544; background:#f6ad5514;}
+  .diff-Hard{color:#fc8181; border-color:#fc818144; background:#fc818114;}
+
+  .freq{display:flex; align-items:center; gap:5px;}
+  .freq-dots{display:flex; align-items:center; gap:3px;}
+  .freq-label{font-family:var(--mono); font-size:10.5px; color:var(--muted); white-space:nowrap;}
+  .freq-dot{width:5px;height:5px;border-radius:50%;background:var(--border);}
+
+  .filter-bar{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;
+  }
+  .filter-chip{
+    font-family:var(--mono); font-size:11.5px; padding:6px 12px; border-radius:20px;
+    border:1px solid var(--border); background:var(--panel); color:var(--muted);
+    cursor:pointer; transition:all .15s;
+  }
+  .filter-chip:hover{color:var(--text); border-color:var(--muted);}
+  .filter-chip.active{background:var(--text); color:var(--bg); border-color:var(--text); font-weight:700;}
+  .qrow.hidden-by-filter{display:none;}
+  .freq-dot.on{background:var(--accent,var(--c-1d));}
+
+  .companies{color:var(--muted); font-size:11.5px; max-width:230px; line-height:1.4;}
+
+  @media (max-width:760px){
+    .qrow{grid-template-columns:24px 1fr; row-gap:6px;}
+    .qrow > .badge, .qrow > .freq, .qrow > .companies{grid-column:2; margin-left:0;}
+    .companies{max-width:none;}
+  }
+
+  footer{margin-top:30px; text-align:center; color:var(--muted); font-size:12px; font-family:var(--mono);}
+  .reset-btn{
+    font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--panel);
+    border:1px solid var(--border); padding:6px 12px; border-radius:6px; cursor:pointer; margin-top:10px;
+  }
+  .reset-btn:hover{color:var(--text); border-color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Samp // DSA Interview Prep 2026 — Module: Dynamic Programming</div>
+    <h1>DP Master List</h1>
+    <div class="disclaimer">
+      <b>Honesty note:</b> no public source — including me — has a verified log of "every DP question ever asked at every company." Company tags below reflect <b>patterns commonly reported</b> in interview-experience threads (LeetCode Discuss, GFG, Glassdoor), not confirmed per-question sourcing. Treat them as "companies known to draw from this pattern," not a guarantee any one of them asked exactly this. What's reliable: the question set itself — this covers the DP patterns that show up across service-based, product-based, and FAANG-tier interviews. Master these and you've covered the space.
+    </div>
+    <div class="overall-bar"><div class="overall-fill" id="overallFill"></div></div>
+  </header>
+
+  <div class="dashboard" id="dashboard"></div>
+
+  <div class="filter-bar" id="filterBar"></div>
+
+  <div id="topics"></div>
+
+  <footer>
+    Progress saved locally on this device (localStorage) · not synced across devices
+    <br>
+    <button class="reset-btn" onclick="if(confirm('Reset all progress?')){localStorage.removeItem('dpMasterListProgress');render();}">Reset progress</button>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+{
+  key:'1d', title:'1D Sequence DP', color:'var(--c-1d)',
+  questions:[
+    {n:'Climbing Stairs', d:'Easy', lc:70, f:2, c:'Amazon, Adobe, Zoho, most service cos'},
+    {n:'Fibonacci Number', d:'Easy', lc:509, f:1, c:'Common warm-up, Directi, Zoho'},
+    {n:'House Robber', d:'Medium', lc:198, f:4, c:'Amazon, Microsoft, Google, Uber, Adobe'},
+    {n:'House Robber II (circular)', d:'Medium', lc:213, f:3, c:'Amazon, Microsoft, Flipkart'},
+    {n:'Maximum Product Subarray', d:'Medium', lc:152, f:3, c:'Amazon, Microsoft, Goldman Sachs'},
+    {n:'Maximum Subarray (Kadane\'s Algorithm)', d:'Easy', lc:53, f:4, c:'Almost every company — Amazon, Microsoft, Google, Adobe, Paytm'},
+    {n:'Decode Ways', d:'Medium', lc:91, f:3, c:'Meta, Amazon, Microsoft'},
+    {n:'Jump Game', d:'Medium', lc:55, f:3, c:'Amazon, Meta, Flipkart'},
+    {n:'Jump Game II', d:'Medium', lc:45, f:2, c:'Amazon, Google'},
+    {n:'Min Cost Climbing Stairs', d:'Easy', lc:746, f:2, c:'Adobe, service-based cos'},
+    {n:'Delete and Earn', d:'Medium', lc:740, f:1, c:'Amazon (occasional)'},
+    {n:'Wiggle Subsequence', d:'Medium', lc:376, f:1, c:'Rare, Microsoft'},
+    {n:'Perfect Squares', d:'Medium', lc:279, f:2, c:'Amazon, Google, Oracle'},
+    {n:'Counting Bits', d:'Easy', lc:338, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'grid', title:'2D Grid / Matrix DP', color:'var(--c-grid)',
+  questions:[
+    {n:'Unique Paths', d:'Medium', lc:62, f:3, c:'Amazon, Microsoft, Adobe, Uber'},
+    {n:'Unique Paths II (obstacles)', d:'Medium', lc:63, f:2, c:'Amazon, Microsoft'},
+    {n:'Minimum Path Sum', d:'Medium', lc:64, f:3, c:'Amazon, Microsoft, Flipkart, Paytm'},
+    {n:'Maximal Square', d:'Medium', lc:221, f:2, c:'Amazon, Google, Salesforce'},
+    {n:'Maximal Rectangle', d:'Hard', lc:85, f:1, c:'Google, Meta (rare)'},
+    {n:'Dungeon Game', d:'Hard', lc:174, f:1, c:'Google, Amazon (rare, tricky reverse-DP)'},
+    {n:'Cherry Pickup', d:'Hard', lc:741, f:1, c:'Google (rare)'},
+    {n:'Triangle (min path sum)', d:'Medium', lc:120, f:2, c:'Amazon, Microsoft'},
+    {n:'Count Square Submatrices with All Ones', d:'Medium', lc:1277, f:1, c:'Amazon (occasional)'},
+    {n:'Minimum Falling Path Sum', d:'Medium', lc:931, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'knap', title:'Knapsack Family', color:'var(--c-knap)',
+  questions:[
+    {n:'0/1 Knapsack (classic, GFG-style)', d:'Medium', lc:'Custom', f:4, c:'Nearly universal in service-based interviews — TCS, Infosys, Zoho, Directi'},
+    {n:'Partition Equal Subset Sum', d:'Medium', lc:416, f:3, c:'Amazon, Microsoft, Meta'},
+    {n:'Target Sum', d:'Medium', lc:494, f:2, c:'Amazon, Google'},
+    {n:'Subset Sum Problem', d:'Medium', lc:'Custom (GFG)', f:3, c:'Service-based cos, Samsung, Zoho'},
+    {n:'Coin Change (min coins)', d:'Medium', lc:322, f:4, c:'Amazon, Microsoft, Google, Adobe, Flipkart'},
+    {n:'Coin Change II (count ways)', d:'Medium', lc:518, f:3, c:'Amazon, Uber, Meta'},
+    {n:'Combination Sum IV', d:'Medium', lc:377, f:2, c:'Amazon, Google'},
+    {n:'Ones and Zeroes', d:'Medium', lc:474, f:1, c:'Google, Meta (occasional)'},
+    {n:'Last Stone Weight II', d:'Medium', lc:1049, f:1, c:'Amazon (rare)'},
+    {n:'Unbounded Knapsack (Rod Cutting)', d:'Medium', lc:'Custom (GFG)', f:2, c:'Service-based cos, Morgan Stanley (rare)'},
+  ]
+},
+{
+  key:'string', title:'String / Sequence Matching DP', color:'var(--c-string)',
+  questions:[
+    {n:'Longest Common Subsequence', d:'Medium', lc:1143, f:4, c:'Amazon, Microsoft, Google, Adobe, Infosys, TCS'},
+    {n:'Longest Palindromic Subsequence', d:'Medium', lc:516, f:2, c:'Amazon, Meta'},
+    {n:'Longest Palindromic Substring', d:'Medium', lc:5, f:4, c:'Amazon, Microsoft, Meta, Adobe, Goldman Sachs'},
+    {n:'Edit Distance', d:'Hard', lc:72, f:4, c:'Google, Amazon, Microsoft, Uber — very common HLD-adjacent DP'},
+    {n:'Distinct Subsequences', d:'Hard', lc:115, f:2, c:'Google, Meta'},
+    {n:'Interleaving String', d:'Medium', lc:97, f:1, c:'Google, Microsoft (rare)'},
+    {n:'Wildcard Matching', d:'Hard', lc:44, f:2, c:'Google, Meta, Uber'},
+    {n:'Regular Expression Matching', d:'Hard', lc:10, f:3, c:'Google, Meta, Microsoft — classic hard-tier'},
+    {n:'Longest Repeating Subsequence', d:'Medium', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+    {n:'Shortest Common Supersequence', d:'Hard', lc:1092, f:1, c:'Amazon (rare)'},
+    {n:'Palindrome Partitioning II (min cuts)', d:'Hard', lc:132, f:2, c:'Amazon, Google'},
+    {n:'Count Different Palindromic Subsequences', d:'Hard', lc:730, f:1, c:'Google (rare)'},
+    {n:'Word Break', d:'Medium', lc:139, f:3, c:'Amazon, Meta, Microsoft, Flipkart'},
+    {n:'Word Break II', d:'Hard', lc:140, f:1, c:'Meta (rare)'},
+    {n:'Minimum ASCII Delete Sum for Two Strings', d:'Medium', lc:712, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'interval', title:'Interval / Partition DP', color:'var(--c-interval)',
+  questions:[
+    {n:'Matrix Chain Multiplication', d:'Hard', lc:'Custom (GFG)', f:2, c:'Classic CS-fundamentals ask — Goldman Sachs, Morgan Stanley, service-based cos'},
+    {n:'Burst Balloons', d:'Hard', lc:312, f:2, c:'Google, Amazon — well-known hard interval DP'},
+    {n:'Palindrome Partitioning', d:'Medium', lc:131, f:2, c:'Amazon, Meta (backtracking + DP variant)'},
+    {n:'Minimum Cost to Cut a Stick', d:'Hard', lc:1547, f:1, c:'Amazon (rare)'},
+    {n:'Strange Printer', d:'Hard', lc:664, f:1, c:'Google (rare)'},
+    {n:'Predict the Winner (Stone Game base)', d:'Medium', lc:486, f:1, c:'Google, Amazon'},
+    {n:'Stone Game', d:'Medium', lc:877, f:1, c:'Amazon (occasional)'},
+  ]
+},
+{
+  key:'stock', title:'State Machine DP (Stocks & Similar)', color:'var(--c-stock)',
+  questions:[
+    {n:'Best Time to Buy/Sell Stock', d:'Easy', lc:121, f:4, c:'Nearly universal — Amazon, Microsoft, Adobe, Paytm, Swiggy'},
+    {n:'Best Time to Buy/Sell Stock II', d:'Medium', lc:122, f:3, c:'Amazon, Microsoft, Uber'},
+    {n:'Best Time to Buy/Sell Stock III', d:'Hard', lc:123, f:2, c:'Amazon, Google'},
+    {n:'Best Time to Buy/Sell Stock IV (k transactions)', d:'Hard', lc:188, f:1, c:'Amazon, Google (rare)'},
+    {n:'Best Time to Buy/Sell Stock with Cooldown', d:'Medium', lc:309, f:2, c:'Amazon, Meta'},
+    {n:'Best Time to Buy/Sell Stock with Transaction Fee', d:'Medium', lc:714, f:1, c:'Amazon (rare)'},
+  ]
+},
+{
+  key:'tree', title:'Tree / Graph DP', color:'var(--c-tree)',
+  questions:[
+    {n:'House Robber III (binary tree)', d:'Medium', lc:337, f:2, c:'Amazon, Microsoft'},
+    {n:'Diameter of Binary Tree (DP-on-tree variant)', d:'Easy', lc:543, f:2, c:'Amazon, Microsoft, Adobe'},
+    {n:'Binary Tree Maximum Path Sum', d:'Hard', lc:124, f:3, c:'Google, Amazon, Meta — very common hard tree DP'},
+    {n:'Longest Increasing Path in a Matrix', d:'Hard', lc:329, f:2, c:'Google, Amazon'},
+    {n:'Cheapest Flights Within K Stops (DP/Bellman-Ford)', d:'Medium', lc:787, f:2, c:'Amazon, Uber, Google'},
+    {n:'Out of Boundary Paths', d:'Medium', lc:576, f:1, c:'Amazon (rare)'},
+    {n:'Number of Ways to Stay in the Same Place After Some Steps', d:'Hard', lc:1269, f:1, c:'Google (rare)'},
+  ]
+},
+{
+  key:'lis', title:'Longest Increasing Subsequence Family', color:'var(--c-1d)',
+  questions:[
+    {n:'Longest Increasing Subsequence', d:'Medium', lc:300, f:4, c:'Amazon, Google, Microsoft, Meta — one of the most-asked DP questions overall'},
+    {n:'Number of Longest Increasing Subsequences', d:'Medium', lc:673, f:1, c:'Google (rare)'},
+    {n:'Russian Doll Envelopes', d:'Hard', lc:354, f:1, c:'Google, Amazon (rare)'},
+    {n:'Maximum Length of Pair Chain', d:'Medium', lc:646, f:1, c:'Amazon (rare)'},
+    {n:'Longest Bitonic Subsequence', d:'Medium', lc:'Custom (GFG)', f:1, c:'Service-based cos (occasional)'},
+    {n:'Box Stacking Problem', d:'Hard', lc:'Custom (GFG)', f:1, c:'Service-based cos (rare)'},
+  ]
+},
+{
+  key:'adv', title:'Advanced / Miscellaneous', color:'var(--c-adv)',
+  questions:[
+    {n:'Egg Drop Puzzle', d:'Hard', lc:887, f:2, c:'Microsoft, Amazon, Goldman Sachs — classic puzzle-DP hybrid'},
+    {n:'Word Ladder II (DP + BFS)', d:'Hard', lc:126, f:1, c:'Google, Meta (rare)'},
+    {n:'Frog Jump', d:'Hard', lc:403, f:1, c:'Amazon (rare)'},
+    {n:'Partition to K Equal Sum Subsets', d:'Medium', lc:698, f:1, c:'Amazon, Uber (occasional, bitmask DP)'},
+    {n:'Shortest Path Visiting All Nodes (bitmask DP)', d:'Hard', lc:847, f:1, c:'Google (rare)'},
+    {n:'Traveling Salesman Problem (bitmask DP)', d:'Hard', lc:'Custom (GFG)', f:1, c:'Goldman Sachs, Morgan Stanley, Google — CS-fundamentals ask'},
+    {n:'Profitable Schemes', d:'Hard', lc:879, f:1, c:'Amazon (rare)'},
+    {n:'Number of Ways to Paint N × 3 Grid', d:'Hard', lc:1411, f:1, c:'Google (rare)'},
+    {n:'Tallest Billboard', d:'Hard', lc:956, f:1, c:'Amazon (rare)'},
+    {n:'Super Egg Drop', d:'Hard', lc:887, f:1, c:'Microsoft (rare, advanced variant)'},
+    {n:'Count of Smaller Numbers After Self (DP variant)', d:'Hard', lc:315, f:1, c:'Google (rare)'},
+    {n:'Concatenated Words', d:'Hard', lc:472, f:1, c:'Google (rare)'},
+    {n:'Minimum Number of Refueling Stops', d:'Hard', lc:871, f:1, c:'Uber, Amazon (rare)'},
+    {n:'Restore The Array (count ways)', d:'Hard', lc:1416, f:1, c:'Amazon (rare)'},
+  ]
+},
+];
+
+const FREQ_LABEL = {1:'Rare',2:'Occasional',3:'Frequent',4:'Very Frequent'};
+const STORAGE_KEY = 'dpMasterListProgress';
+const COLLAPSE_KEY = 'dpMasterListCollapse';
+let activeFilter = null; // null = show all, else 1-4
+
+function loadProgress(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveProgress(p){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+}
+function loadCollapse(){
+  try{ return JSON.parse(localStorage.getItem(COLLAPSE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveCollapse(c){
+  localStorage.setItem(COLLAPSE_KEY, JSON.stringify(c));
+}
+
+function qid(topicKey, idx){ return topicKey+'-'+idx; }
+
+function render(){
+  const progress = loadProgress();
+  const collapse = loadCollapse();
+
+  let totalQ=0, totalDone=0;
+  const dashEl = document.getElementById('dashboard');
+  const topicsEl = document.getElementById('topics');
+  topicsEl.innerHTML='';
+
+  DATA.forEach(topic=>{
+    const done = topic.questions.filter((q,i)=>progress[qid(topic.key,i)]).length;
+    totalQ += topic.questions.length;
+    totalDone += done;
+
+    const isCollapsed = !!collapse[topic.key];
+    const topicDiv = document.createElement('div');
+    topicDiv.className = 'topic' + (isCollapsed ? ' collapsed':'');
+
+    const pct = Math.round((done/topic.questions.length)*100);
+
+    topicDiv.innerHTML = `
+      <div class="topic-head" data-key="${topic.key}">
+        <div class="topic-title-group">
+          <span class="dot" style="background:${topic.color}"></span>
+          <span class="topic-title">${topic.title}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="topic-count">${done}/${topic.questions.length}</span>
+          <div class="topic-progress"><div class="topic-progress-fill" style="width:${pct}%;background:${topic.color}"></div></div>
+          <span class="chevron">▼</span>
+        </div>
+      </div>
+      <div class="qlist"></div>
+    `;
+
+    const qlist = topicDiv.querySelector('.qlist');
+    topic.questions.forEach((q,i)=>{
+      const id = qid(topic.key,i);
+      const isDone = !!progress[id];
+      const row = document.createElement('div');
+      row.className = 'qrow' + (isDone?' done':'');
+      row.style.setProperty('--accent', topic.color);
+
+      let dots='';
+      for(let d=1; d<=4; d++){
+        dots += `<span class="freq-dot ${d<=q.f?'on':''}" style="${d<=q.f?`background:${topic.color}`:''}"></span>`;
+      }
+
+      row.dataset.freq = q.f;
+      if(activeFilter && Number(activeFilter) !== q.f){
+        row.classList.add('hidden-by-filter');
+      }
+
+      row.innerHTML = `
+        <button class="chk ${isDone?'checked':''}" data-id="${id}" style="--accent:${topic.color}"></button>
+        <span class="qname">${q.n}<span class="lc">${q.lc==='Custom'?'· Custom':'· LC '+q.lc}</span></span>
+        <span class="badge diff-${q.d}">${q.d}</span>
+        <span class="freq" title="${FREQ_LABEL[q.f]}">
+          <span class="freq-dots">${dots}</span>
+          <span class="freq-label">${FREQ_LABEL[q.f]}</span>
+        </span>
+        <span class="companies">${q.c}</span>
+      `;
+      qlist.appendChild(row);
+    });
+
+    topicsEl.appendChild(topicDiv);
+  });
+
+  // dashboard
+  dashEl.innerHTML = `
+    <div class="stat"><div class="num">${totalQ}</div><div class="lbl">Total Questions</div></div>
+    <div class="stat"><div class="num">${totalDone}</div><div class="lbl">Completed</div></div>
+    <div class="stat"><div class="num">${totalQ-totalDone}</div><div class="lbl">Remaining</div></div>
+    <div class="stat"><div class="num">${totalQ?Math.round((totalDone/totalQ)*100):0}%</div><div class="lbl">Progress</div></div>
+  `;
+  document.getElementById('overallFill').style.width = (totalQ?Math.round((totalDone/totalQ)*100):0)+'%';
+
+  // filter bar
+  const filterBar = document.getElementById('filterBar');
+  const chips = [{f:null,l:'All'},{f:4,l:'Very Frequent'},{f:3,l:'Frequent'},{f:2,l:'Occasional'},{f:1,l:'Rare'}];
+  filterBar.innerHTML = chips.map(ch=>
+    `<button class="filter-chip ${activeFilter===ch.f?'active':''}" data-f="${ch.f}">${ch.l}</button>`
+  ).join('');
+  filterBar.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      const val = chip.dataset.f;
+      activeFilter = (val==='null') ? null : Number(val);
+      render();
+    });
+  });
+
+  // wire events
+  document.querySelectorAll('.chk').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const p = loadProgress();
+      const id = btn.dataset.id;
+      p[id] = !p[id];
+      saveProgress(p);
+      render();
+    });
+  });
+  document.querySelectorAll('.topic-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const c = loadCollapse();
+      const key = head.dataset.key;
+      c[key] = !c[key];
+      saveCollapse(c);
+      render();
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
