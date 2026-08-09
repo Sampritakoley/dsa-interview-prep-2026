@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Binary Search · DSA Interview Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EEF2FF;
+  --surface: #FFFFFF;
+  --border: #C7D2FE;
+  --primary: #2563EB;
+  --primary-dim: #DBEAFE;
+  --done-color: #7C3AED;
+  --done-dim: #EDE9FE;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --easy: #059669; --easy-bg: #D1FAE5;
+  --medium: #D97706; --medium-bg: #FEF3C7;
+  --hard: #DC2626; --hard-bg: #FEE2E2;
+  --vh-c: #1E40AF; --vh-bg: #DBEAFE;
+  --hi-c: #1D4ED8; --hi-bg: #EFF6FF;
+  --med-c: #64748B; --med-bg: #F1F5F9;
+  --lo-c: #94A3B8; --lo-bg: #F8FAFC;
+  --radius: 10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#1E3A8A 0%,#1D4ED8 60%,#3B82F6 100%);color:#fff;padding:2.5rem 1.5rem 2rem;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(90deg,rgba(255,255,255,0.04) 0px,rgba(255,255,255,0.04) 1px,transparent 1px,transparent 40px);pointer-events:none}
+.hdr-inner{max-width:1100px;margin:0 auto;position:relative}
+.hdr-top{display:flex;align-items:flex-start;gap:2rem;flex-wrap:wrap}
+.hdr-text{flex:1;min-width:240px}
+.hdr-eyebrow{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#93C5FD;margin-bottom:.5rem}
+.hdr-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.7rem,4vw,2.5rem);font-weight:700;line-height:1.1;color:#fff;margin-bottom:.55rem}
+.hdr-sub{font-size:.88rem;color:#BFDBFE;max-width:500px}
+
+/* Bisection vis */
+.bisect-wrap{display:flex;flex-direction:column;gap:6px;padding-top:4px}
+.bisect-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#93C5FD;letter-spacing:.06em;margin-bottom:2px}
+.bisect-cells{display:flex;gap:3px}
+.bisect-cell{width:32px;height:32px;border-radius:5px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.45);transition:all .45s ease}
+.bisect-cell.active{background:rgba(255,255,255,.95);color:#1E3A8A;border-color:transparent;font-weight:700}
+.bisect-cell.lo-cell{background:rgba(96,165,250,.3);color:#BFDBFE;border-color:#60A5FA}
+.bisect-cell.hi-cell{background:rgba(167,139,250,.3);color:#DDD6FE;border-color:#A78BFA}
+.bisect-cell.elim{opacity:.2}
+.bisect-ptrs{display:flex;gap:3px;margin-top:2px}
+.bisect-ptr{width:32px;height:13px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.52rem;color:transparent;transition:color .45s}
+.bisect-ptr.slo{color:#60A5FA}
+.bisect-ptr.shi{color:#A78BFA}
+.bisect-ptr.smid{color:#FCD34D}
+@media(prefers-reduced-motion:reduce){.bisect-cell,.bisect-ptr{transition:none}}
+
+/* PROGRESS BAR */
+.prog-wrap{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.5rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.prog-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.prog-lbl{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.88rem;white-space:nowrap}
+.prog-lbl span{color:var(--primary);font-size:1.05rem}
+.prog-track{flex:1;min-width:120px;height:7px;background:var(--primary-dim);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--done-color));border-radius:99px;transition:width .4s ease;width:0%}
+.prog-pct{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text-muted);white-space:nowrap}
+.reset-btn{margin-left:auto;background:none;border:1px solid var(--border);border-radius:6px;padding:.22rem .7rem;font-size:.76rem;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:border-color .2s,color .2s}
+.reset-btn:hover{border-color:var(--hard);color:var(--hard)}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:1.4rem 1.5rem 3rem}
+
+/* CAT NAV */
+.cat-nav{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1.2rem}
+.cat-pill{padding:.28rem .7rem;border-radius:99px;font-size:.76rem;font-family:'Space Grotesk',sans-serif;font-weight:500;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);transition:all .15s;cursor:pointer}
+.cat-pill:hover{background:var(--primary-dim);border-color:var(--primary);color:var(--primary)}
+
+/* LEGEND */
+.legend{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:1.1rem}
+.legend-lbl{font-size:.76rem;color:var(--text-muted)}
+
+/* CONTROLS */
+.controls{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:1.6rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.7rem .9rem}
+.controls input,.controls select{border:1px solid var(--border);border-radius:6px;padding:.38rem .65rem;font-size:.83rem;font-family:'Inter',sans-serif;color:var(--text);background:var(--bg);outline:none;transition:border-color .15s}
+.controls input:focus,.controls select:focus{border-color:var(--primary)}
+.controls input{flex:1;min-width:170px}
+.controls select{min-width:135px}
+.hide-lbl{display:flex;align-items:center;gap:.35rem;font-size:.81rem;color:var(--text-muted);cursor:pointer;margin-left:auto;white-space:nowrap}
+.hide-lbl input[type=checkbox]{accent-color:var(--primary)}
+
+/* CAT SECTION */
+.cat-sec{margin-bottom:2rem}
+.cat-hdr{display:flex;align-items:center;gap:.65rem;margin-bottom:.45rem}
+.cat-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text-muted)}
+.cat-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.97rem;color:var(--text)}
+.cat-stat{font-size:.76rem;color:var(--text-muted);margin-left:auto}
+.mini-track{height:3px;background:var(--primary-dim);border-radius:99px;margin-bottom:.85rem;overflow:hidden}
+.mini-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--done-color));border-radius:99px;transition:width .4s ease}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-left:3px solid transparent;border-radius:8px;padding:.8rem .95rem;display:flex;align-items:flex-start;gap:.85rem;margin-bottom:.45rem;transition:box-shadow .2s,border-color .2s;animation:fadeUp .18s ease both}
+.card:hover{box-shadow:0 2px 14px rgba(37,99,235,.09);border-color:#A5B4FC}
+.card[data-d="E"]{border-left-color:var(--easy)}
+.card[data-d="M"]{border-left-color:var(--medium)}
+.card[data-d="H"]{border-left-color:var(--hard)}
+.card.done{opacity:.5}
+.card.done .ctitle{text-decoration:line-through;color:var(--text-muted)}
+
+/* Checkbox */
+.cb-wrap{flex-shrink:0;padding-top:2px}
+.cb-wrap input{display:none}
+.cb-wrap label{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.cb-wrap label:hover{border-color:var(--primary)}
+.cb-wrap input:checked + label{background:var(--done-color);border-color:var(--done-color)}
+.cb-wrap label svg{display:none}
+.cb-wrap input:checked + label svg{display:block}
+.cb-wrap label:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:50%}
+
+/* Card body */
+.cbody{flex:1;min-width:0}
+.ctitle-row{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.3rem}
+.clc{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-muted);flex-shrink:0}
+.ctitle{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.9rem;color:var(--text);transition:color .15s;word-break:break-word}
+.ctitle:hover{color:var(--primary)}
+.prem-tag{font-size:.63rem;background:#FEF3C7;color:#92400E;border-radius:4px;padding:1px 5px;font-weight:600;flex-shrink:0}
+.diff-badge{font-size:.68rem;font-weight:700;border-radius:4px;padding:1px 7px;flex-shrink:0}
+.diff-badge.E{background:var(--easy-bg);color:var(--easy)}
+.diff-badge.M{background:var(--medium-bg);color:var(--medium)}
+.diff-badge.H{background:var(--hard-bg);color:var(--hard)}
+
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:.28rem}
+.chip{display:inline-flex;align-items:center;font-size:.67rem;border-radius:4px;padding:2px 7px;font-weight:500;white-space:nowrap}
+.chip.VH{background:var(--vh-bg);color:var(--vh-c);border:1px solid #93C5FD}
+.chip.H{background:var(--hi-bg);color:var(--hi-c);border:1px solid #BFDBFE}
+.chip.M{background:var(--med-bg);color:var(--med-c);border:1px solid #CBD5E1}
+.chip.L{background:var(--lo-bg);color:var(--lo-c);border:1px solid #E2E8F0}
+
+/* Empty */
+.empty{text-align:center;padding:3rem 1rem;color:var(--text-muted);font-size:.88rem}
+
+/* Footer */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:1.4rem 1.5rem;text-align:center;font-size:.76rem;color:var(--text-muted);line-height:1.75}
+footer strong{color:var(--text)}
+
+/* Animation */
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.card{animation:none}.prog-fill,.mini-fill{transition:none}}
+
+@media(max-width:600px){
+  .hdr{padding:1.4rem 1rem 1.2rem}
+  .main{padding:1rem 1rem 2rem}
+  .prog-wrap{padding:.7rem 1rem}
+  .bisect-wrap{display:none}
+  .controls{flex-direction:column}
+  .hide-lbl{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="hdr-top">
+      <div class="hdr-text">
+        <div class="hdr-eyebrow">DSA Interview Tracker · Binary Search</div>
+        <h1 class="hdr-title">Binary Search<br>Interview Prep</h1>
+        <p class="hdr-sub">53 curated problems · 8 categories · FAANG &amp; major tech companies · Guided path: fundamentals → advanced</p>
+      </div>
+      <div class="bisect-wrap" aria-hidden="true">
+        <div class="bisect-lbl">Binary search — watch lo &amp; hi converge</div>
+        <div class="bisect-cells" id="bisectCells"></div>
+        <div class="bisect-ptrs"  id="bisectPtrs"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="prog-wrap">
+  <div class="prog-inner">
+    <div class="prog-lbl"><span id="doneCount">0</span> / <span id="totalCount">0</span> solved</div>
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-pct" id="progPct">0%</div>
+    <button class="reset-btn" id="resetBtn">Reset</button>
+  </div>
+</div>
+
+<main class="main">
+  <nav class="cat-nav" id="catNav" aria-label="Jump to category"></nav>
+
+  <div class="legend">
+    <span class="legend-lbl">Frequency:</span>
+    <span class="chip VH">Very High</span>
+    <span class="chip H">High</span>
+    <span class="chip M">Medium</span>
+    <span class="chip L">Low</span>
+  </div>
+
+  <div class="controls">
+    <input type="search" id="srch" placeholder="Search problem title…" aria-label="Search">
+    <select id="coFilter" aria-label="Company"><option value="">All companies</option></select>
+    <select id="catFilter" aria-label="Category"><option value="">All categories</option></select>
+    <select id="difFilter" aria-label="Difficulty">
+      <option value="">All difficulties</option>
+      <option value="E">Easy</option>
+      <option value="M">Medium</option>
+      <option value="H">Hard</option>
+    </select>
+    <label class="hide-lbl"><input type="checkbox" id="hideDone"> Hide solved</label>
+  </div>
+
+  <div id="problemList"></div>
+</main>
+
+<footer>
+  <p><strong>Data sourcing:</strong> Company associations and frequency tiers are compiled from community trackers including
+  <em>liquidslr/interview-company-wise-problems</em>, <em>hxu296/leetcode-company-wise-problems-2022</em>,
+  NeetCode 150, Blind 75, and AlgoMonster frequency data.
+  <strong>VH</strong> = consistently in a company's 30-day/3-month window &nbsp;|&nbsp;
+  <strong>H</strong> = 3–6 months &nbsp;|&nbsp; <strong>M/L</strong> = older or sparser reports.
+  These are community-reported estimates, <strong>not official LeetCode statistics</strong>.
+  🔒 = LeetCode Premium problem. Progress saves automatically to your browser.</p>
+</footer>
+
+<script>
+const CATS = [
+  {id:'classic',    label:'Classic Binary Search',           num:'01'},
+  {id:'rotated',    label:'Rotated & Modified Arrays',       num:'02'},
+  {id:'peak',       label:'Peak Finding',                    num:'03'},
+  {id:'answer',     label:'Binary Search on Answer',         num:'04'},
+  {id:'matrix',     label:'2D Matrix Search',                num:'05'},
+  {id:'predicate',  label:'Custom Predicate / Comparator',   num:'06'},
+  {id:'median',     label:'Median & Kth Element',            num:'07'},
+  {id:'aggressive', label:'Aggressive Binary Search',        num:'08'},
+];
+
+const FREQ = {VH:'Very High', H:'High', M:'Medium', L:'Low'};
+const DIFF = {E:'Easy', M:'Medium', H:'Hard'};
+
+const PROBLEMS = [
+  // 01 Classic
+  {n:704,  t:'Binary Search',                                          s:'binary-search',                                           d:'E',p:0,c:'classic',    co:[['Amazon','VH'],['Google','VH'],['Microsoft','H'],['Meta','M']]},
+  {n:35,   t:'Search Insert Position',                                 s:'search-insert-position',                                  d:'E',p:0,c:'classic',    co:[['Amazon','H'],['Google','H'],['Microsoft','M'],['Bloomberg','M']]},
+  {n:278,  t:'First Bad Version',                                      s:'first-bad-version',                                       d:'E',p:0,c:'classic',    co:[['Amazon','VH'],['Meta','H'],['Google','H'],['Microsoft','M']]},
+  {n:69,   t:'Sqrt(x)',                                                s:'sqrtx',                                                   d:'E',p:0,c:'classic',    co:[['Google','H'],['Amazon','H'],['Apple','M'],['Microsoft','M']]},
+  {n:34,   t:'Find First and Last Position of Element in Sorted Array',s:'find-first-and-last-position-of-element-in-sorted-array', d:'M',p:0,c:'classic',    co:[['Amazon','VH'],['Google','VH'],['Meta','H'],['Bloomberg','H'],['Microsoft','H']]},
+  {n:374,  t:'Guess Number Higher or Lower',                           s:'guess-number-higher-or-lower',                            d:'E',p:0,c:'classic',    co:[['Google','M'],['Amazon','L'],['Apple','L']]},
+  {n:1539, t:'Kth Missing Positive Number',                            s:'kth-missing-positive-number',                             d:'E',p:0,c:'classic',    co:[['Amazon','H'],['Google','M'],['Bloomberg','M']]},
+  {n:744,  t:'Find Smallest Letter Greater Than Target',               s:'find-smallest-letter-greater-than-target',                d:'E',p:0,c:'classic',    co:[['Amazon','M'],['Google','M']]},
+  {n:441,  t:'Arranging Coins',                                        s:'arranging-coins',                                         d:'E',p:0,c:'classic',    co:[['Amazon','M'],['Microsoft','L']]},
+  {n:367,  t:'Valid Perfect Square',                                   s:'valid-perfect-square',                                    d:'E',p:0,c:'classic',    co:[['Apple','M'],['Amazon','M'],['LinkedIn','L']]},
+  // 02 Rotated
+  {n:33,   t:'Search in Rotated Sorted Array',                         s:'search-in-rotated-sorted-array',                          d:'M',p:0,c:'rotated',    co:[['Amazon','VH'],['Google','VH'],['Meta','VH'],['Microsoft','H'],['Bloomberg','H'],['Uber','H']]},
+  {n:81,   t:'Search in Rotated Sorted Array II',                      s:'search-in-rotated-sorted-array-ii',                       d:'M',p:0,c:'rotated',    co:[['Amazon','H'],['Microsoft','H'],['Google','M'],['Uber','M']]},
+  {n:153,  t:'Find Minimum in Rotated Sorted Array',                   s:'find-minimum-in-rotated-sorted-array',                    d:'M',p:0,c:'rotated',    co:[['Amazon','H'],['Google','H'],['Meta','H'],['Microsoft','M'],['Bloomberg','M']]},
+  {n:154,  t:'Find Minimum in Rotated Sorted Array II',                s:'find-minimum-in-rotated-sorted-array-ii',                 d:'H',p:0,c:'rotated',    co:[['Amazon','M'],['Microsoft','M'],['Google','L']]},
+  {n:1095, t:'Find in Mountain Array',                                 s:'find-in-mountain-array',                                  d:'H',p:1,c:'rotated',    co:[['Google','H'],['Amazon','M']]},
+  // 03 Peak
+  {n:162,  t:'Find Peak Element',                                      s:'find-peak-element',                                       d:'M',p:0,c:'peak',       co:[['Google','VH'],['Amazon','H'],['Meta','H'],['Bloomberg','H'],['Microsoft','M']]},
+  {n:852,  t:'Peak Index in a Mountain Array',                         s:'peak-index-in-a-mountain-array',                          d:'M',p:0,c:'peak',       co:[['Amazon','H'],['Google','H'],['Bloomberg','M']]},
+  {n:1901, t:'Find a Peak Element II',                                 s:'find-a-peak-element-ii',                                  d:'M',p:0,c:'peak',       co:[['Google','VH'],['Amazon','H'],['Meta','M']]},
+  {n:845,  t:'Longest Mountain in Array',                              s:'longest-mountain-in-array',                               d:'M',p:0,c:'peak',       co:[['Amazon','M'],['Google','L']]},
+  // 04 Answer
+  {n:875,  t:'Koko Eating Bananas',                                    s:'koko-eating-bananas',                                     d:'M',p:0,c:'answer',     co:[['Amazon','VH'],['Google','VH'],['Meta','H'],['Bloomberg','H'],['Uber','M']]},
+  {n:1011, t:'Capacity To Ship Packages Within D Days',                s:'capacity-to-ship-packages-within-d-days',                 d:'M',p:0,c:'answer',     co:[['Amazon','VH'],['Google','H'],['Meta','H'],['Bloomberg','M']]},
+  {n:1482, t:'Minimum Number of Days to Make m Bouquets',             s:'minimum-number-of-days-to-make-m-bouquets',              d:'M',p:0,c:'answer',     co:[['Amazon','H'],['Google','H'],['Meta','M']]},
+  {n:410,  t:'Split Array Largest Sum',                                s:'split-array-largest-sum',                                 d:'H',p:0,c:'answer',     co:[['Google','VH'],['Amazon','H'],['Meta','H'],['Bloomberg','H'],['ByteDance','H']]},
+  {n:1283, t:'Find the Smallest Divisor Given a Threshold',            s:'find-the-smallest-divisor-given-a-threshold',             d:'M',p:0,c:'answer',     co:[['Amazon','H'],['Google','M']]},
+  {n:2187, t:'Minimum Time to Complete Trips',                         s:'minimum-time-to-complete-trips',                          d:'M',p:0,c:'answer',     co:[['Amazon','H'],['Google','M'],['Meta','M']]},
+  {n:2226, t:'Maximum Candies Allocated to K Children',               s:'maximum-candies-allocated-to-k-children',                d:'M',p:0,c:'answer',     co:[['Amazon','M'],['Google','M']]},
+  {n:1760, t:'Minimum Limit of Balls in a Bag',                        s:'minimum-limit-of-balls-in-a-bag',                         d:'M',p:0,c:'answer',     co:[['Google','H'],['Amazon','M']]},
+  {n:1870, t:'Minimum Speed to Arrive on Time',                        s:'minimum-speed-to-arrive-on-time',                         d:'M',p:0,c:'answer',     co:[['Google','M'],['Amazon','M'],['Uber','M']]},
+  {n:774,  t:'Minimize Max Distance to Gas Station',                   s:'minimize-max-distance-to-gas-station',                    d:'H',p:1,c:'answer',     co:[['Google','H'],['Uber','M'],['Amazon','M']]},
+  {n:1898, t:'Maximum Number of Removable Characters',                 s:'maximum-number-of-removable-characters',                  d:'M',p:0,c:'answer',     co:[['Amazon','H'],['Google','M']]},
+  // 05 Matrix
+  {n:74,   t:'Search a 2D Matrix',                                     s:'search-a-2d-matrix',                                      d:'M',p:0,c:'matrix',     co:[['Amazon','VH'],['Google','H'],['Microsoft','H'],['Bloomberg','H'],['Meta','M']]},
+  {n:240,  t:'Search a 2D Matrix II',                                  s:'search-a-2d-matrix-ii',                                   d:'M',p:0,c:'matrix',     co:[['Amazon','H'],['Google','H'],['Apple','H'],['Microsoft','M'],['Bloomberg','H']]},
+  {n:1351, t:'Count Negative Numbers in a Sorted Matrix',              s:'count-negative-numbers-in-a-sorted-matrix',               d:'E',p:0,c:'matrix',     co:[['Google','M'],['Microsoft','M'],['Amazon','L']]},
+  {n:378,  t:'Kth Smallest Element in a Sorted Matrix',               s:'kth-smallest-element-in-a-sorted-matrix',                d:'M',p:0,c:'matrix',     co:[['Amazon','H'],['Google','H'],['Bloomberg','H'],['Apple','M']]},
+  // 06 Predicate
+  {n:275,  t:'H-Index II',                                             s:'h-index-ii',                                              d:'M',p:1,c:'predicate',  co:[['Google','H'],['LinkedIn','H'],['Amazon','M']]},
+  {n:719,  t:'Find K-th Smallest Pair Distance',                       s:'find-k-th-smallest-pair-distance',                        d:'H',p:0,c:'predicate',  co:[['Google','H'],['Amazon','M'],['Bloomberg','M']]},
+  {n:668,  t:'Kth Smallest Number in Multiplication Table',            s:'kth-smallest-number-in-multiplication-table',             d:'H',p:1,c:'predicate',  co:[['Google','H'],['Amazon','M']]},
+  {n:436,  t:'Find Right Interval',                                    s:'find-right-interval',                                     d:'M',p:0,c:'predicate',  co:[['Amazon','M'],['Google','L'],['Bloomberg','M']]},
+  {n:1802, t:'Maximum Value at a Given Index in a Bounded Array',      s:'maximum-value-at-a-given-index-in-a-bounded-array',       d:'M',p:0,c:'predicate',  co:[['Amazon','M'],['Google','M']]},
+  {n:2137, t:'Pour Water Between Buckets to Make Water Levels Equal',  s:'pour-water-between-buckets-to-make-water-levels-equal',   d:'M',p:1,c:'predicate',  co:[['Google','M'],['Amazon','L']]},
+  // 07 Median
+  {n:4,    t:'Median of Two Sorted Arrays',                            s:'median-of-two-sorted-arrays',                             d:'H',p:0,c:'median',     co:[['Amazon','VH'],['Google','VH'],['Meta','VH'],['Microsoft','H'],['Bloomberg','H'],['Apple','H'],['Citadel','H']]},
+  {n:215,  t:'Kth Largest Element in an Array',                        s:'kth-largest-element-in-an-array',                         d:'M',p:0,c:'median',     co:[['Amazon','VH'],['Google','H'],['Meta','H'],['Bloomberg','H'],['Microsoft','H'],['Uber','H'],['Adobe','H']]},
+  {n:786,  t:'K-th Smallest Prime Fraction',                           s:'k-th-smallest-prime-fraction',                            d:'H',p:0,c:'median',     co:[['Google','H'],['Amazon','M'],['Bloomberg','M']]},
+  {n:373,  t:'Find K Pairs with Smallest Sums',                        s:'find-k-pairs-with-smallest-sums',                         d:'M',p:0,c:'median',     co:[['Google','H'],['Amazon','H'],['Bloomberg','M']]},
+  {n:230,  t:'Kth Smallest Element in a BST',                          s:'kth-smallest-element-in-a-bst',                           d:'M',p:0,c:'median',     co:[['Amazon','H'],['Google','H'],['Meta','M'],['Bloomberg','M'],['Microsoft','M']]},
+  {n:295,  t:'Find Median from Data Stream',                           s:'find-median-from-data-stream',                            d:'H',p:0,c:'median',     co:[['Amazon','VH'],['Google','VH'],['Meta','H'],['Bloomberg','VH'],['Microsoft','H'],['Citadel','H']]},
+  // 08 Aggressive
+  {n:1552, t:'Magnetic Force Between Two Balls',                       s:'magnetic-force-between-two-balls',                        d:'M',p:0,c:'aggressive', co:[['Google','H'],['Amazon','M'],['Meta','M']]},
+  {n:2616, t:'Minimize the Maximum Difference of Pairs',               s:'minimize-the-maximum-difference-of-pairs',                d:'M',p:0,c:'aggressive', co:[['Google','M'],['Amazon','M'],['ByteDance','M']]},
+  {n:2439, t:'Minimize Maximum of Array',                              s:'minimize-maximum-of-array',                               d:'M',p:0,c:'aggressive', co:[['Amazon','M'],['Google','M']]},
+  {n:1231, t:'Divide Chocolate',                                       s:'divide-chocolate',                                        d:'H',p:1,c:'aggressive', co:[['Google','H'],['Apple','M'],['Meta','M']]},
+  {n:1891, t:'Cutting Ribbons',                                        s:'cutting-ribbons',                                         d:'M',p:1,c:'aggressive', co:[['Amazon','H'],['Google','M'],['Bloomberg','M']]},
+  {n:644,  t:'Maximum Average Subarray II',                            s:'maximum-average-subarray-ii',                             d:'H',p:1,c:'aggressive', co:[['Google','H'],['Amazon','M']]},
+  {n:2064, t:'Minimized Maximum of Products Distributed to Any Store', s:'minimized-maximum-of-products-distributed-to-any-store',  d:'M',p:0,c:'aggressive', co:[['Amazon','M'],['Google','M'],['ByteDance','M']]},
+];
+
+// Storage
+const SKEY = 'bs-tracker-v1';
+let doneIds = new Set();
+const hasSt = !!(window.storage && typeof window.storage.get === 'function');
+
+async function loadProg() {
+  if (!hasSt) return;
+  try {
+    const r = await window.storage.get(SKEY);
+    if (r && r.value) { const a = JSON.parse(r.value); if (Array.isArray(a)) doneIds = new Set(a); }
+  } catch(_) {}
+}
+async function saveProg() {
+  if (!hasSt) return;
+  try { await window.storage.set(SKEY, JSON.stringify([...doneIds])); } catch(_) {}
+}
+
+// DOM
+const TOTAL = PROBLEMS.length;
+const doneCountEl = document.getElementById('doneCount');
+const totalCountEl = document.getElementById('totalCount');
+const progFill = document.getElementById('progFill');
+const progPct = document.getElementById('progPct');
+const probList = document.getElementById('problemList');
+const srch = document.getElementById('srch');
+const coFilter = document.getElementById('coFilter');
+const catFilter = document.getElementById('catFilter');
+const difFilter = document.getElementById('difFilter');
+const hideDone = document.getElementById('hideDone');
+const resetBtn = document.getElementById('resetBtn');
+const catNav = document.getElementById('catNav');
+
+totalCountEl.textContent = TOTAL;
+
+// Nav pills
+CATS.forEach(cat => {
+  const a = document.createElement('a');
+  a.href = '#cat-' + cat.id;
+  a.className = 'cat-pill';
+  a.textContent = cat.label;
+  catNav.appendChild(a);
+});
+
+// Category select
+CATS.forEach(cat => {
+  const o = document.createElement('option');
+  o.value = cat.id; o.textContent = cat.label;
+  catFilter.appendChild(o);
+});
+
+// Company select
+const coSet = new Set();
+PROBLEMS.forEach(p => p.co.forEach(([c]) => coSet.add(c)));
+[...coSet].sort().forEach(c => {
+  const o = document.createElement('option');
+  o.value = c; o.textContent = c;
+  coFilter.appendChild(o);
+});
+
+function matches(p) {
+  const q = srch.value.trim().toLowerCase();
+  const co = coFilter.value;
+  const cat = catFilter.value;
+  const dif = difFilter.value;
+  if (q && !p.t.toLowerCase().includes(q)) return false;
+  if (co && !p.co.some(([c]) => c === co)) return false;
+  if (cat && p.c !== cat) return false;
+  if (dif && p.d !== dif) return false;
+  if (hideDone.checked && doneIds.has(p.n)) return false;
+  return true;
+}
+
+function updateProgress() {
+  const done = doneIds.size;
+  const pct = TOTAL ? Math.round(done / TOTAL * 100) : 0;
+  doneCountEl.textContent = done;
+  progFill.style.width = pct + '%';
+  progPct.textContent = pct + '%';
+}
+
+function updateMinis() {
+  CATS.forEach(cat => {
+    const total = PROBLEMS.filter(p => p.c === cat.id).length;
+    const done  = PROBLEMS.filter(p => p.c === cat.id && doneIds.has(p.n)).length;
+    const el = document.getElementById('mf-' + cat.id);
+    if (el) el.style.width = (total ? done / total * 100 : 0) + '%';
+  });
+}
+
+function render() {
+  const filtered = PROBLEMS.filter(matches);
+  probList.innerHTML = '';
+
+  if (!filtered.length) {
+    probList.innerHTML = '<div class="empty">No problems match your filters — try adjusting the search or dropdowns above.</div>';
+    return;
+  }
+
+  const grouped = {};
+  CATS.forEach(cat => { grouped[cat.id] = []; });
+  filtered.forEach(p => { if (grouped[p.c]) grouped[p.c].push(p); });
+
+  CATS.forEach(cat => {
+    const probs = grouped[cat.id];
+    if (!probs.length) return;
+
+    const catTotal = PROBLEMS.filter(p => p.c === cat.id).length;
+    const catDone  = PROBLEMS.filter(p => p.c === cat.id && doneIds.has(p.n)).length;
+    const pct = catTotal ? catDone / catTotal * 100 : 0;
+
+    const sec = document.createElement('div');
+    sec.className = 'cat-sec';
+    sec.id = 'cat-' + cat.id;
+    sec.innerHTML =
+      '<div class="cat-hdr">' +
+        '<span class="cat-num">' + cat.num + '/08</span>' +
+        '<span class="cat-name">' + cat.label + '</span>' +
+        '<span class="cat-stat">' + catDone + '/' + catTotal + '</span>' +
+      '</div>' +
+      '<div class="mini-track"><div class="mini-fill" id="mf-' + cat.id + '" style="width:' + pct + '%"></div></div>';
+
+    probs.forEach((p, pi) => {
+      const isDone = doneIds.has(p.n);
+      const chips = p.co.map(([co, f]) =>
+        '<span class="chip ' + f + '">' + co + ' · ' + FREQ[f] + '</span>'
+      ).join('');
+      const lock = p.p ? '<span class="prem-tag">🔒 Premium</span>' : '';
+
+      const card = document.createElement('div');
+      card.className = 'card' + (isDone ? ' done' : '');
+      card.dataset.d = p.d;
+      card.style.animationDelay = (pi * 0.028) + 's';
+      card.innerHTML =
+        '<div class="cb-wrap">' +
+          '<input type="checkbox" id="cb' + p.n + '"' + (isDone ? ' checked' : '') + ' aria-label="Mark ' + p.t + ' as done">' +
+          '<label for="cb' + p.n + '" tabindex="0">' +
+            '<svg width="12" height="9" viewBox="0 0 12 9" fill="none">' +
+              '<polyline points="1,4.5 4.5,8 11,1" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+            '</svg>' +
+          '</label>' +
+        '</div>' +
+        '<div class="cbody">' +
+          '<div class="ctitle-row">' +
+            '<span class="clc">#' + p.n + '</span>' +
+            '<a class="ctitle" href="https://leetcode.com/problems/' + p.s + '/" target="_blank" rel="noopener">' + p.t + '</a>' +
+            lock +
+            '<span class="diff-badge ' + p.d + '">' + DIFF[p.d] + '</span>' +
+          '</div>' +
+          '<div class="chips">' + chips + '</div>' +
+        '</div>';
+      sec.appendChild(card);
+    });
+
+    probList.appendChild(sec);
+  });
+
+  updateMinis();
+}
+
+// Checkbox delegation
+probList.addEventListener('change', async e => {
+  if (e.target.type !== 'checkbox') return;
+  const n = parseInt(e.target.id.replace('cb', ''));
+  if (e.target.checked) doneIds.add(n); else doneIds.delete(n);
+  const card = e.target.closest('.card');
+  if (card) card.classList.toggle('done', e.target.checked);
+  updateProgress();
+  updateMinis();
+  await saveProg();
+});
+
+// Label keyboard
+probList.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'Enter') {
+    const lbl = e.target.closest('label');
+    if (lbl) { e.preventDefault(); lbl.click(); }
+  }
+});
+
+// Filters
+[srch, coFilter, catFilter, difFilter, hideDone].forEach(el => el.addEventListener('input', render));
+
+// Reset
+let resetArmed = false, resetTimer = null;
+resetBtn.addEventListener('click', async () => {
+  if (!resetArmed) {
+    resetArmed = true;
+    resetBtn.textContent = 'Click again to confirm';
+    resetTimer = setTimeout(() => { resetArmed = false; resetBtn.textContent = 'Reset'; }, 3000);
+  } else {
+    clearTimeout(resetTimer);
+    resetArmed = false;
+    resetBtn.textContent = 'Reset';
+    doneIds.clear();
+    await saveProg();
+    updateProgress();
+    render();
+  }
+});
+
+// Bisection animation
+(function() {
+  const vals = [2, 5, 8, 12, 16, 23, 38, 56, 72];
+  const target = 23;
+  const cellsEl = document.getElementById('bisectCells');
+  const ptrsEl  = document.getElementById('bisectPtrs');
+  if (!cellsEl || !ptrsEl) return;
+
+  vals.forEach(v => {
+    const c = document.createElement('div');
+    c.className = 'bisect-cell'; c.textContent = v;
+    cellsEl.appendChild(c);
+    const p = document.createElement('div');
+    p.className = 'bisect-ptr';
+    ptrsEl.appendChild(p);
+  });
+
+  const cells = cellsEl.querySelectorAll('.bisect-cell');
+  const ptrs  = ptrsEl.querySelectorAll('.bisect-ptr');
+
+  // Pre-compute steps
+  const steps = [];
+  let lo = 0, hi = vals.length - 1;
+  while (lo <= hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    steps.push({lo, hi, mid});
+    if (vals[mid] === target) break;
+    else if (vals[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+
+  let idx = 0;
+  function tick() {
+    const s = steps[idx % steps.length];
+    cells.forEach((c, i) => {
+      c.className = 'bisect-cell';
+      ptrs[i].className = 'bisect-ptr'; ptrs[i].textContent = '';
+      if (i < s.lo || i > s.hi) { c.classList.add('elim'); }
+      else if (i === s.mid) { c.classList.add('active'); ptrs[i].classList.add('smid'); ptrs[i].textContent = 'mid'; }
+      else if (i === s.lo)  { c.classList.add('lo-cell'); ptrs[i].classList.add('slo'); ptrs[i].textContent = 'lo'; }
+      else if (i === s.hi)  { c.classList.add('hi-cell'); ptrs[i].classList.add('shi'); ptrs[i].textContent = 'hi'; }
+    });
+    idx++;
+  }
+  tick();
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    setInterval(tick, 1700);
+  }
+})();
+
+// Boot
+(async function() {
+  await loadProg();
+  updateProgress();
+  render();
+})();
+</script>
+</body>
+</html>
