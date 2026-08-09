@@ -11,4 +11,8 @@
 👉 **[Array](https://sampritakoley.github.io/dsa-interview-prep-2026/Array/)** <br>
 👉 **[String](https://sampritakoley.github.io/dsa-interview-prep-2026/String/)** <br>
 👉 **[LinkedList & Stack & Queue](https://sampritakoley.github.io/dsa-interview-prep-2026/LinkedListStackQueue/)**<br>
+👉 **[BinarySearch](https://sampritakoley.github.io/dsa-interview-prep-2026/BinarySearch/)**<br>
 👉 **[SlidingWindow & TwoPointer](https://sampritakoley.github.io/dsa-interview-prep-2026/SlidingWindowTwoPointer/)**
+
+
+
