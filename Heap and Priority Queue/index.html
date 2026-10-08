@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Heap / Priority Queue: Interview Master List</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f7f8f5;--fg:#1d2420;--mut:#66706a;--card:#fff;--line:#dfe4de;--acc:#1f6f5c;--e:#2e8b57;--m:#b7791f;--h:#c0392b;--chip:#eef2ee}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a17;--fg:#e8ede9;--mut:#9aa6a0;--card:#1c2420;--line:#2e3832;--acc:#4fc3a1;--e:#5cc98a;--m:#e0a84a;--h:#f07a6c;--chip:#26302b}}
+:root[data-theme="dark"]{--bg:#141a17;--fg:#e8ede9;--mut:#9aa6a0;--card:#1c2420;--line:#2e3832;--acc:#4fc3a1;--e:#5cc98a;--m:#e0a84a;--h:#f07a6c;--chip:#26302b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Inter,system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:20px 14px 60px}
+h1{font:700 clamp(26px,5vw,40px)/1.1 Newsreader,Georgia,serif;margin:0 0 6px}
+.sub{color:var(--mut);margin:0 0 16px;max-width:70ch}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line)}
+.prog{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-weight:600}
+.track{flex:1;height:8px;background:var(--chip);border-radius:9px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--acc);transition:width .25s}
+.ctl{display:flex;flex-wrap:wrap;gap:8px}
+input,select,button{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+input[type=search]{flex:1;min-width:180px}
+button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+details{margin-top:22px}
+summary{cursor:pointer;font:700 21px Newsreader,Georgia,serif;padding:6px 0;display:flex;gap:10px;align-items:baseline}
+summary small{font:500 13px Inter;color:var(--mut)}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mut);font-size:13px;background:var(--chip)}
+tr:last-child td{border-bottom:0}
+tr.done td{opacity:.55}tr.done .q{text-decoration:line-through}
+.q{font-weight:500}.q a{color:var(--acc)}
+.d-E{color:var(--e)}.d-M{color:var(--m)}.d-H{color:var(--h)}.d-E,.d-M,.d-H{font-weight:600}
+.co{display:flex;flex-wrap:wrap;gap:4px}.co span{background:var(--chip);border-radius:5px;padding:0 6px;font-size:12px;white-space:nowrap}
+.f{white-space:nowrap}.f i{display:inline-block;width:6px;height:12px;margin-right:2px;border-radius:2px;background:var(--line)}.f i.on{background:var(--acc)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--acc)}
+.none{padding:30px;text-align:center;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style></head><body><main>
+<h1>Heap / Priority Queue: master list</h1>
+<p class="sub">Every heap and priority-queue interview question compiled from public interview reports, grouped by pattern. Tick a question when you finish it; your progress is saved on this device. Company tags come from candidate reports and may be incomplete.</p>
+<div class="bar">
+<div class="prog"><span id="pt">0 / 0 done</span><div class="track"><div class="fill" id="pf"></div></div></div>
+<div class="ctl">
+<input type="search" id="q" placeholder="Search question or company">
+<select id="sc"><option value="core">Core list (Frequent and Very Frequent)</option><option value="all">Everything</option></select>
+<select id="fd"><option value="">All difficulty</option><option value="E">Easy</option><option value="M">Medium</option><option value="H">Hard</option></select>
+<select id="ff"><option value="">All frequency</option><option value="V">Very Frequent</option><option value="F">Frequent</option><option value="O">Occasional</option><option value="R">Rare</option></select>
+<select id="fc"><option value="">All companies</option></select>
+<select id="fs"><option value="">Done and pending</option><option value="p">Pending only</option><option value="d">Done only</option></select>
+<select id="so"><option value="">Default order</option><option value="f">Most frequent first</option></select>
+<button id="rs">Reset progress</button>
+</div></div>
+<div id="out"></div>
+</main>
+<script>
+const CO={A:"Amazon",G:"Google",M:"Meta",MS:"Microsoft",AP:"Apple",NF:"Netflix",UB:"Uber",FK:"Flipkart",AD:"Adobe",GS:"Goldman Sachs",MO:"Morgan Stanley",SF:"Salesforce",OR:"Oracle",SA:"Samsung",AT:"Atlassian",WM:"Walmart",PP:"PayPal",IN:"Intuit",DR:"Directi",ZO:"Zoho",PT:"Paytm",SW:"Swiggy",ZM:"Zomato",RZ:"Razorpay",BB:"Bloomberg",LI:"LinkedIn",AB:"Airbnb",LY:"Lyft",TW:"Twitter",OL:"Ola",CT:"Citadel"};
+const FN={V:["Very Frequent",4],F:["Frequent",3],O:["Occasional",2],R:["Rare",1]},DN={E:"Easy",M:"Medium",H:"Hard"};
+const S=[
+["1. Heap fundamentals and implementation",[
+"Implement Min Heap / Max Heap (insert, extract, peek)|E|C|F|A MS ZO OR SA FK AD GS",
+"Build Heap (heapify) in O(n) and prove it|M|C|F|A MS GS OR SA",
+"Heap Sort (in-place)|M|C|F|MS A ZO SA OR AD",
+"Implement Priority Queue with array / linked list|E|C|O|ZO SA OR DR",
+"Decrease-key / delete arbitrary element from heap|M|C|O|G MS DR FK",
+"Check if array represents a Min Heap|E|C|O|SA ZO OR",
+"Convert Min Heap to Max Heap|M|C|R|SA OR ZO",
+"Check if a Binary Tree is a Max Heap|M|C|O|A MS AD",
+"Check Completeness of a Binary Tree|M|958|O|A MS BB",
+"Convert BST to Min Heap|M|C|R|SA OR",
+"Merge two Binary Max Heaps|M|C|R|SA ZO",
+"Sort an Array (heap sort approach)|M|912|O|A MS",
+"Implement Stack / Queue using Priority Queue|E|C|R|ZO OR SA",
+"Last Stone Weight|E|1046|O|A AD AP",
+"Kth Largest Element in a Stream|E|703|F|A G MS AD GS",
+"Maximum Product of Two Elements in an Array|E|1464|R|A",
+"Relative Ranks|E|506|R|A",
+"Heap vs BST vs sorted array: complexity trade-offs|E|C|F|A G MS GS",
+"Implement d-ary heap / Indexed priority queue|H|C|R|G DR"]],
+["2. Top-K and Kth element",[
+"Kth Largest Element in an Array|M|215|V|A G M MS AP AD GS MO UB FK SF OR WM BB LI",
+"Top K Frequent Elements|M|347|V|A G M MS AP UB FK AD SF LI WM",
+"Top K Frequent Words|M|692|V|A M AP MS BB UB AB",
+"K Closest Points to Origin|M|973|V|A M G MS UB LI AP FK",
+"Find K Closest Elements|M|658|F|M A G LI",
+"Kth Smallest Element in a Sorted Matrix|M|378|F|A G M MS FK AD",
+"Find K Pairs with Smallest Sums|M|373|F|A G MS AD",
+"Kth Smallest Prime Fraction|M|786|O|G A",
+"Sort Characters By Frequency|M|451|F|A M MS AD",
+"Least Number of Unique Integers after K Removals|M|1481|O|A",
+"The K Weakest Rows in a Matrix|E|1337|O|A",
+"Kth Largest Sum in a Binary Tree|M|2583|R|A",
+"Find Kth Largest XOR Coordinate Value|M|1738|R|A",
+"Kth Smallest Element in a BST|M|230|F|A G M MS",
+"Find the Kth Smallest Sum of a Matrix With Sorted Rows|H|1439|O|G A",
+"Find the K-Sum of an Array|H|2386|R|G",
+"Find K-th Smallest Pair Distance|H|719|O|G A",
+"Top K Frequent Elements in a data stream|M|C|O|G M A UB",
+"K Largest Elements in an Array|E|C|F|A MS ZO SA",
+"Sum of elements between k1-th and k2-th smallest|M|C|R|SA ZO",
+"Maximum Sum Combinations (top K sums of two arrays)|M|C|O|A GS FK",
+"K nearest cabs / drivers (Uber, Ola style)|M|C|O|UB OL SW ZM",
+"Kth largest element in every sliding window|H|C|R|A G",
+"Top K products / songs by sales (coding round)|M|C|O|A NF WM",
+"Reduce Array Size to Half|M|1338|R|A",
+"Grouped Top-K (top K per category)|M|C|O|A WM"]],
+["3. K-way merge and sorted streams",[
+"Merge k Sorted Lists|H|23|V|A G M MS AP UB FK AD GS SF OR LI BB",
+"Merge K Sorted Arrays|M|C|F|A MS FK GS SA ZO",
+"Sort a Nearly Sorted (K-sorted) Array|M|C|F|A MS FK SA OR AD",
+"Smallest Range Covering Elements from K Lists|H|632|F|G A M MS FK UB AP",
+"Ugly Number II|M|264|O|A G MS AP",
+"Super Ugly Number|M|313|O|G A",
+"Find median of K sorted arrays|H|C|R|G",
+"External sort / sort a huge file with limited memory|H|C|O|G M A FK MS",
+"Merge K sorted log streams|M|C|O|M G",
+"Optimal Merge Pattern (merge files)|M|C|R|SA ZO",
+"Zigzag Iterator (k vectors)|M|281|R|G M"]],
+["4. Two heaps and running median",[
+"Find Median from Data Stream|H|295|V|A G M MS AP UB FK AD GS SF LI NF",
+"Sliding Window Median|H|480|F|A G M MS AP",
+"Sliding Window Maximum|H|239|V|A G M MS UB FK AD GS",
+"IPO (Maximize Capital)|H|502|O|A G UB",
+"Finding MK Average|H|1825|R|G A",
+"Total Cost to Hire K Workers|M|2462|O|A",
+"Minimize Deviation in Array|H|1675|O|G A UB",
+"Median of stream with deletions (lazy deletion)|H|C|R|G",
+"Moving Average / running statistics of a stream|M|C|O|A G",
+"Min-Max Heap (O(1) min and max)|M|C|R|G",
+"Smallest Number in Infinite Set|M|2336|O|A",
+"Maximum Number of Eaten Apples|M|1705|R|A"]],
+["5. Scheduling, intervals and event simulation",[
+"Meeting Rooms II|M|253|V|A G M MS UB FK AD GS SF OR BB LI WM AT",
+"Meeting Rooms III|H|2402|O|A G UB",
+"Task Scheduler|M|621|V|A M G MS AP UB FK AD SF",
+"Reorganize String|M|767|V|A M G MS AP UB AD",
+"Rearrange String k Distance Apart|H|358|O|G A M",
+"Course Schedule III|H|630|O|A G UB",
+"Minimum Number of Refueling Stops|H|871|F|A G UB",
+"Car Pooling|M|1094|F|A UB G LY",
+"The Skyline Problem|H|218|F|G A M MS AP UB",
+"Employee Free Time|H|759|F|G A M UB LI",
+"Maximum Number of Events That Can Be Attended|M|1353|O|A G",
+"Minimum Interval to Include Each Query|H|1851|R|G A",
+"Single-Threaded CPU|M|1834|O|A G",
+"Process Tasks Using Servers|M|1882|R|A",
+"Find Servers That Handled Most Number of Requests|H|1606|O|G A UB",
+"The Number of the Smallest Unoccupied Chair|M|1942|O|A G",
+"Furthest Building You Can Reach|M|1642|O|A G",
+"Number of Orders in the Backlog|M|1801|R|A",
+"Exam Room|M|855|O|G A M",
+"Job Sequencing Problem|M|C|O|A MS ZO SA",
+"Minimum Platforms (railway station)|M|C|F|A MS FK ZO SA GS",
+"Longest Happy String|M|1405|O|A G",
+"Distant Barcodes|M|1054|R|A",
+"Construct String With Repeat Limit|M|2182|R|A",
+"Maximum Number of Weeks for Which You Can Work|M|1953|R|A",
+"Dota2 Senate|M|649|R|A M",
+"Campus Bikes|M|1057|O|G A UB",
+"Meeting Scheduler|M|1229|O|A G M"]],
+["6. Greedy with a heap",[
+"Minimum Cost to Connect Sticks (Connect Ropes)|M|1167|F|A G MS FK GS ZO OR",
+"Huffman Coding|M|C|F|A MS GS SA OR ZO",
+"Remove Stones to Minimize the Total|M|1962|R|A",
+"Minimum Operations to Halve Array Sum|M|2208|O|A",
+"Maximal Score After Applying K Operations|M|2530|R|A",
+"Take Gifts From the Richest Pile|E|2558|R|A",
+"Maximum Product After K Increments|M|2233|R|A",
+"Minimum Cost to Hire K Workers|H|857|O|G A UB",
+"Maximum Performance of a Team|H|1383|O|A G",
+"Maximum Subsequence Score|M|2542|R|A",
+"Maximum Elegance of a K-Length Subsequence|H|2813|R|A",
+"Maximum Average Pass Ratio|M|1792|O|A G",
+"Maximum Score From Removing Stones|M|1753|R|A",
+"Sell Diminishing-Valued Colored Balls|M|1648|R|A",
+"Construct Target Array With Multiple Sums|H|1354|O|G A",
+"Split Array into Consecutive Subsequences|M|659|O|G A",
+"Hand of Straights|M|846|F|A G MS",
+"Divide Array in Sets of K Consecutive Numbers|M|1296|O|A",
+"Maximum Frequency Stack|H|895|O|A G M",
+"Constrained Subsequence Sum|H|1425|O|G A",
+"Jump Game VI|M|1696|R|A",
+"Max Value of Equation|H|1499|R|G",
+"Fractional Knapsack|M|C|F|A MS SA ZO",
+"Maximize Sum of Array After K Negations|E|1005|R|A"]],
+["7. Graphs with a priority queue",[
+"Network Delay Time|M|743|V|A G M MS UB AP FK",
+"Cheapest Flights Within K Stops|M|787|V|A G M UB AD",
+"Implement Dijkstra's Algorithm|M|C|V|A G MS GS ZO SA FK",
+"Path With Minimum Effort|M|1631|F|A G UB",
+"Swim in Rising Water|H|778|O|G A",
+"Path With Maximum Probability|M|1514|O|A",
+"Trapping Rain Water II|H|407|F|G A M AP",
+"Min Cost to Connect All Points (Prim)|M|1584|F|A G M",
+"Prim's Minimum Spanning Tree|M|C|F|A MS SA ZO",
+"Number of Ways to Arrive at Destination|M|1976|O|A G",
+"Reachable Nodes in Subdivided Graph|H|882|R|G",
+"Minimum Time to Visit a Cell in a Grid|H|2577|R|A",
+"Cut Off Trees for Golf Event|H|675|O|A G",
+"Reconstruct Itinerary|H|332|F|G A M UB",
+"Shortest path with K hops / K-th shortest path|H|C|R|G UB",
+"Lexicographically smallest topological order|M|C|O|G A",
+"Minimum Cost to Make at Least One Valid Path in a Grid|H|1368|R|G A",
+"Minimum cost path in weighted grid (Dijkstra)|M|C|O|A UB FK"]],
+["8. Design and system-flavoured problems",[
+"Design Twitter|M|355|F|A M G TW MS UB",
+"Design Search Autocomplete System|H|642|F|A G M UB LI MS",
+"LFU Cache|H|460|F|A G M MS UB",
+"Design a Leaderboard|M|1244|O|A G",
+"Stock Price Fluctuation|M|2034|O|A G",
+"Seat Reservation Manager|M|1845|R|A",
+"Design Task Manager|M|3408|R|A",
+"Top-K trending hashtags / hit counter|M|C|O|M TW G",
+"Delayed task queue / event scheduler|M|C|O|G A AT UB",
+"In-memory job scheduler with priorities and expiry|M|C|O|AT A",
+"Nearest rider assignment (delivery apps)|M|C|O|SW ZM",
+"Rate limiter with priority classes|M|C|R|UB SW",
+"Least-loaded server selection (load balancer)|M|C|R|UB G",
+"Order book / matching engine|H|C|O|GS MO CT",
+"Latency percentile tracker|H|C|R|NF G",
+"Streaming Top-K with Count-Min Sketch plus heap|H|C|R|G M NF",
+"Elevator scheduling|H|C|R|G A"]],
+["9. Advanced and miscellaneous",[
+"Lazy deletion in heaps|M|C|O|G A M",
+"Kth smallest element in a binary heap in O(k)|H|C|R|G",
+"Fibonacci Heap (amortized analysis)|H|C|R|G",
+"Binomial Heap|H|C|R|G",
+"Leftist / Skew / Pairing Heap|H|C|R|G",
+"Tournament (loser) tree for external merge|H|C|R|G",
+"Order-statistic tree vs two heaps for medians|H|C|R|G",
+"Replace each element by its rank|E|C|R|SA",
+"Sort Array by Increasing Frequency|E|1636|R|A"]]];
+const $=id=>document.getElementById(id);
+let done=new Set();
+try{done=new Set(JSON.parse(localStorage.getItem("heapdone")||"[]"))}catch(e){}
+const save=()=>{try{localStorage.setItem("heapdone",JSON.stringify([...done]))}catch(e){}};
+let n=0;const D=S.map(([t,r])=>[t,r.map(s=>{const[a,d,l,f,c]=s.split("|");return{id:n++,a,d,l,f,c:c.split(" ").map(x=>CO[x]||x)}})]);
+const all=D.flatMap(x=>x[1]);
+[...new Set(all.flatMap(x=>x.c))].sort().forEach(c=>{const o=document.createElement("option");o.value=o.textContent=c;$("fc").appendChild(o)});
+function prog(){const sc=all.filter(x=>$("sc").value=="all"||x.f=="V"||x.f=="F"),t=sc.length,k=sc.filter(x=>done.has(x.id)).length;$("pt").textContent=k+" / "+t+" done";$("pf").style.width=(100*k/t)+"%"}
+function render(){
+const q=$("q").value.toLowerCase(),fd=$("fd").value,ff=$("ff").value,fc=$("fc").value,fs=$("fs").value,so=$("so").value;
+let h="",shown=0;
+D.forEach(([t,r])=>{
+let rows=r.filter(x=>($("sc").value=="all"||x.f=="V"||x.f=="F")&&(!q||(x.a+" "+x.c.join(" ")).toLowerCase().includes(q))&&(!fd||x.d==fd)&&(!ff||x.f==ff)&&(!fc||x.c.includes(fc))&&(!fs||(fs=="d")==done.has(x.id)));
+if(so)rows=[...rows].sort((a,b)=>FN[b.f][1]-FN[a.f][1]);
+if(!rows.length)return;shown+=rows.length;
+const dn=r.filter(x=>done.has(x.id)).length;
+h+=`<details open><summary>${t}<small>${dn}/${r.length} done</small></summary><div class="wrap"><table><thead><tr><th>Done</th><th>Question</th><th>Difficulty</th><th>Companies</th><th>LeetCode</th><th>Frequency</th></tr></thead><tbody>`;
+rows.forEach(x=>{const w=FN[x.f][1];
+h+=`<tr class="${done.has(x.id)?"done":""}"><td><input type="checkbox" data-i="${x.id}" aria-label="Mark done" ${done.has(x.id)?"checked":""}></td><td class="q">${x.a}</td><td class="d-${x.d}">${DN[x.d]}</td><td><div class="co">${x.c.map(c=>`<span>${c}</span>`).join("")}</div></td><td>${x.l=="C"?"Custom":`<a href="https://leetcode.com/problemset/?search=${x.l}" target="_blank" rel="noopener">${x.l}</a>`}</td><td class="f" title="${FN[x.f][0]}">${[1,2,3,4].map(i=>`<i class="${i<=w?"on":""}"></i>`).join("")} ${FN[x.f][0]}</td></tr>`});
+h+="</tbody></table></div></details>"});
+$("out").innerHTML=h||'<div class="none">No questions match these filters.</div>';prog()}
+$("out").addEventListener("change",e=>{const i=+e.target.dataset.i;if(isNaN(i))return;e.target.checked?done.add(i):done.delete(i);save();render()});
+["q","sc","fd","ff","fc","fs","so"].forEach(i=>$(i).addEventListener("input",render));
+$("rs").onclick=()=>{if(confirm("Clear all progress on this device?")){done.clear();save();render()}};
+render();
+</script></body></html>
