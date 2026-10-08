@@ -2,7 +2,6 @@
 
 
 
-
 ## 🔗 Live Site
 👉 **[Binary Tree DSA](https://sampritakoley.github.io/dsa-interview-prep-2026/)** <br>
 👉 **[Graph DSA](https://fastidious-naiad-51362d.netlify.app/)** <br>
@@ -12,6 +11,8 @@
 👉 **[String](https://sampritakoley.github.io/dsa-interview-prep-2026/String/)** <br>
 👉 **[LinkedList & Stack & Queue](https://sampritakoley.github.io/dsa-interview-prep-2026/LinkedListStackQueue/)**<br>
 👉 **[BinarySearch](https://sampritakoley.github.io/dsa-interview-prep-2026/BinarySearch/)**<br>
+👉 **[Heap and Priority Queue](https://sampritakoley.github.io/dsa-interview-prep-2026/Heap%20and%20Priority%20Queue/
+)**<br>
 👉 **[SlidingWindow & TwoPointer](https://sampritakoley.github.io/dsa-interview-prep-2026/SlidingWindowTwoPointer/)**<br>
 
 
